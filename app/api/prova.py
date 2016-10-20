@@ -3,6 +3,7 @@ import sys, os
 import re, json
 import pymongo
 from pymongo import MongoClient
+from neo4j.v1 import GraphDatabase, basic_auth
 
 parsed_output = {
     'Count': 0,
@@ -20,6 +21,20 @@ def main(argv):
     print 'Expanding fields...'
     os.system("python vcf_melt.py " + input_file)
 
+
+    # Versione che salva le righe del file in GraphDB
+    print 'Populating Database...'
+
+    # Connessione a Neo4j
+    driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "password"));
+    session = driver.session()
+
+    # Creo il nodo corrispondente al file
+    session.run("CREATE (f: File {name:'" + 'test_vcf' +  "'})")
+
+
+    ''' 
+    # Versione che salva le righe del file in mongoDB 
     print 'Populating Database...'
     # Connessione a MongoDB
     client = MongoClient()
@@ -50,7 +65,8 @@ def main(argv):
             headers = re.sub("\n", "", line).split('\t')
         
         i = i + 1
-    
+    '''
+
 #    print 'Creating JSON file...'
 
 #   row = 0 # Questa variabile mi permette di identificare l'header (la prima riga del file)

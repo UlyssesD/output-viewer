@@ -1,0 +1,18 @@
+<md-table-container>
+    <table md-table md-progress="$ctrl.promise">
+        <thead md-head>
+            <!--<th md-column ng-repeat="var in $ctrl.data.Header track by $index">{{var}}</th>-->
+            <th md-column md-numeric>AB</th>
+            <th md-column md-numeric>ABP</th>
+        </thead>
+        <tbody md-boby>
+            <tr md-row ng-repeat="it in $ctrl.data track by $index">
+                <!--<td md-cell ng-repeat="el in it.Values track by $index">{{el}}</td>-->
+                <td md-cell> {{it.AB}}</td>
+                <td md-cell> {{it.ABP}}</td>
+            </tr>
+        </tbody>
+    </table>
+</md-table-container>
+
+<md-table-pagination md-limit="$ctrl.query.limit" md-limit-options="[10, 20, 30]" md-page="$ctrl.query.page" md-total="3563" md-on-paginate="$ctrl.getElems" md-page-select></md-table-pagination>

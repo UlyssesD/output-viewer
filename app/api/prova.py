@@ -1,6 +1,10 @@
 #!/usr/bin/python   # Script python per il parsing del file caricato in upload su server da elaborare in formato json
+#-*- coding: utf-8 -*-
+
 import sys, os
 import re, json
+import vcf
+
 import pymongo
 from pymongo import MongoClient
 from neo4j.v1 import GraphDatabase, basic_auth
@@ -18,20 +22,95 @@ def main(argv):
     
     print 'Starting parsing procedure for file ' + input_file
 
-    print 'Expanding fields...'
-    os.system("python vcf_melt.py " + input_file)
+#    print 'Expanding fields...'
+#    os.system("python vcf_melt.py " + input_file)
 
+    print 'Opening .vcf file...'
+    reader = vcf.VCFReader(open(input_file, 'r'))
 
     # Versione che salva le righe del file in GraphDB
     print 'Populating Database...'
+
 
     # Connessione a Neo4j
     driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "password"));
     session = driver.session()
 
-    # Creo il nodo corrispondente al file
-    session.run("CREATE (f: File {name:'" + 'test_vcf' +  "'})")
+    # Creo un nodo corrispondente al file
+    filename = 'test_vcf'
+    file_id = ''
+    f = session.run("CREATE (f: File {name:'"+ filename + "'}) RETURN ID(f) as file_id")
 
+    for res in f: file_id = res["file_id"]
+
+    for record in reader:
+        
+        # Genero il nodo corrispondente alla variante
+        variant = {
+            "CHROM": record.CHROM,
+            "POS": record.POS,
+            "ID": record.ID or '.',
+            "REF": record.REF,
+            "ALT": str(record.ALT).strip('[]').split(','),
+            "QUAL": record.QUAL,
+            "FILTER": record.FILTER or '.',
+            "FORMAT": record.FORMAT or '.'
+        }
+
+        variant_id = ''
+        v = session.run("CREATE (v: Variant {CHROM: {CHROM}, POS: {POS}, ID: {ID}, REF: {REF}, ALT: {ALT}, QUAL: {QUAL}, FILTER: {FILTER}, FORMAT: {FORMAT}}) RETURN ID(v) as variant_id", variant)
+
+        for res in v: variant_id = res["variant_id"]
+        
+        # Creo la relazione File -> Variante
+        session.run("MATCH (f: File), (v: Variant) where ID(f) = {file_id} and ID(v) = {variant_id} create (f)-[:Contains]->(v)", {
+            "file_id": file_id,
+            "variant_id": variant_id
+        })
+        
+        # Costruisco la stringa della lista degli attributi delle annotazioni (sono costretto a farlo perchè non ho un modo univoco per sapere a priori i campi presenti)
+        attributes = '{ '
+        for attr in record.INFO.keys():
+            attributes = attributes + '' + attr + ': {' + attr + '}, '
+
+        attributes = attributes.strip(', ') + '}'
+        
+        # Genero il nodo corrispondente alle annotazioni
+        info_id = ''
+        i = session.run("CREATE (i: Info " + attributes + ") return ID(i) as info_id", record.INFO);
+
+        for res in i: info_id = res["info_id"]
+
+        # Creo la relazione Variante -> Info
+        session.run("MATCH (v: Variant), (i: Info) where ID(v) = {variant_id} and ID(i) = {info_id} create (v)-[:Annotation]->(i)", {
+            "variant_id": variant_id,
+            "info_id": info_id
+        })
+
+        # Ricavo i nomi degli attributi dei sample
+        format_vars = record.FORMAT.split(':')
+
+        for sample in record.samples:
+            attributes = '{ sample: ' + sample.sample + ', '
+            genotype = {}
+
+            for i in range(len(format_vars)): 
+                attributes = attributes + format_vars[i] + ': {' + format_vars[i] + '}, ' 
+                genotype[format_vars[i]] = sample.data[i]
+
+            attributes = attributes.strip(', ') + '}'
+
+            # Genero il nodo corrispondente all'i-esimo genotipo
+            genotype_id = ''
+            g = session.run("CREATE (g: Genotype " + attributes + ") return ID(g) as genotype_id", genotype);
+
+            for res in g: genotype_id = res["genotype_id"]
+
+            # Creo la relazione Variante -> Info
+            session.run("MATCH (v: Variant), (g: Genotype) where ID(v) = {variant_id} and ID(g) = {genotype_id} create (v)-[:Sample]->(g)", {
+                "variant_id": variant_id,
+                "genotype_id": genotype_id
+            })
 
     ''' 
     # Versione che salva le righe del file in mongoDB 
@@ -46,7 +125,7 @@ def main(argv):
     rows = db.rows
     
     i = 0         # Usato per sapere quando stiamo leggendo le righe
-    headers = 0     # Memorizzato per salvare gli header del file in input
+    headers = []    # Memorizzato per salvare gli header del file in input
 
     for line in open(re.sub("(\.)(\w)*$", "", input_file) + '_parsed.txt'):
         
@@ -96,6 +175,8 @@ def main(argv):
 #    with open(re.sub("(\.)(\w)*$", "", input_file) + '.json', 'w') as output_file:
 #        json.dump(parsed_output, output_file)
 
+    # Chiudo la sessione di Neo4j e termino
+    session.close()
     print 'Done.'
 
 ''' Versione che effettua il parse del file tramite regex 

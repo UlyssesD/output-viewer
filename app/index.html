@@ -28,39 +28,39 @@
   <md-content flex layout="row">
 
     <!-- Container #3 -->
-    <md-sidenav class="md-whiteframe-4dp" md-is-locked-open="$mdMedia('gt-sm')"
+    <!--<md-sidenav class="md-whiteframe-4dp" md-is-locked-open="$mdMedia('gt-sm')"
                 md-component-id="left" ng-click="app.toggleList()">
       
-      <!-- Menu -->
+      
       <menu-list
           menu-items="app.menuItems"
           selected="app.selected"
           on-selected="app.logItem(item)">
       </menu-list>
 
-    </md-sidenav>
+    </md-sidenav>-->
 
     <!-- Container #4 -->
-    <div flex layout="row">
-      <div flex=70 layout="column">
+    <!--<div flex layout="row">-->
+      <div flex layout="column">
         <md-card layout-margin layout-padding>
           <md-card-content>
             <table-data></table-data>
           </md-card-content>
       </md-card>
       </div>
-      
+<!--      
       <div flex=30 layout="column">  
-        <md-card>
+        <md-card>-->
           <!--<img src="card-image.png" class="md-card-image" alt="image caption">-->
-          <md-card-content>
+<!--          <md-card-content>
             <h2>Seleziona un file</h2>
             <p>Selezionare il file che si intende visualizzare.</p>
           </md-card-content>
           <md-card-actions layout="row" layout-align="end center">
             <md-button ngf-select="app.upload($file)">Seleziona</md-button>
           </md-card-actions>
-        </md-card>
+        </md-card>-->
 
 <!--        <md-content flex="50" class="content md-whiteframe-2dp" layout-margin layout-padding>
           Posizione occupata dai filtri
@@ -70,7 +70,7 @@
       <!--<user-details
           selected="app.selected" >
       </user-details>-->
-      </div>
+      <!--</div>-->
 
   </md-content>
 

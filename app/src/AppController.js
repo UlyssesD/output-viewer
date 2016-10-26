@@ -12,6 +12,13 @@ function AppController( MenuDataService, TableDataService, Upload, $mdSidenav) {
     self.menuItems    = [ ];
     self.logItem      = logItem;
     self.toggleList   = toggleMenuList;
+/*
+    TableDataService.loadVariantsFromQuery({
+            'limit': 5,
+            'page': 1,
+            'skip': 0
+        }).then(function(data){ console.log('trallallero'); console.log(data)});
+*/
     self.upload = function (file) {
         console.log(file);
 /*       

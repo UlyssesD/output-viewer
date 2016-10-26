@@ -1,14 +1,34 @@
-<md-table-container>
-    <table md-table md-progress="$ctrl.promise">
-        <thead md-head>
-            <th md-column ng-repeat="el in $ctrl.headers">{{el}}</th>
-        </thead>
-        <tbody md-boby>
-            <tr md-row ng-repeat="it in $ctrl.data track by $index">
-                <td md-cell ng-repeat="key in $ctrl.headers" >{{it.row[0].variant[key]}}</td>
-            </tr>
-        </tbody>
-    </table>
-</md-table-container>
+<md-card>
+        <md-table-container>
+            <table md-table md-row-relect md-progress="$ctrl.promise">
+                <thead md-head>
+                    <tr md-row>
+                        <th md-column><span>{{$ctrl.vcf_headers.CHROM}}</span></th>
+                        <th md-column md-numeric><span>{{$ctrl.vcf_headers.POS}}</span></th>
+                        <th md-column md-numeric><span>{{$ctrl.vcf_headers.ID}}</span></th>
+                        <th md-column><span>{{$ctrl.vcf_headers.REF}}</span></th>
+                        <th md-column><span>{{$ctrl.vcf_headers.ALT}}</span></th>
+                        <th md-column md-numeric><span>{{$ctrl.vcf_headers.QUAL}}</span></th>
+                        <th md-column><span>{{$ctrl.vcf_headers.FILTER}}</span></th>
+                        <th md-column><span>{{$ctrl.vcf_headers.INFO}}</span></th>
+                        <th md-column><span>{{$ctrl.vcf_headers.GENOTYPES}}</span></th>
+                    </tr>
+                </thead>
+                <tbody md-body>
+                    <tr md-row ng-repeat="elem in $ctrl.data.variants track by $index">
+                        <td md-cell><p>{{elem.variant.CHROM}}</p></td>
+                        <td md-cell><p>{{elem.variant.POS}}</p></td>
+                        <td md-cell><p>{{elem.variant.ID}}</p></td>
+                        <td md-cell><p>{{elem.variant.REF}}</p></td>
+                        <td md-cell><p><ng-repeat ng-repeat="alt in elem.variant.ALT">{{alt}}{{$last ? '' : ', '}}</ng-repeat></p></td>
+                        <td md-cell><p>{{elem.variant.QUAL}}</p></td>
+                        <td md-cell><p>{{elem.variant.FILTER}}</p></td>  
+                        <td md-cell><p>{{elem.annotations ? 'Show details' : '-'}}</p></td>
+                        <td md-cell><p>{{elem.genotypes.length != 0 ? elem.genotypes.length + ' sample(s)' : '-'}}</p></td>
+                    </tr>
+                </tbody>
+            </table>
+        </md-table-container>
 
-<md-table-pagination md-limit="$ctrl.query.limit" md-limit-options="[10, 20, 30]" md-page="$ctrl.query.page" md-total="{{$ctrl.count}}" md-on-paginate="$ctrl.getElems" md-page-select></md-table-pagination>
+        <md-table-pagination md-limit="$ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="$ctrl.query.page" md-total="{{$ctrl.data.count}}" md-on-paginate="$ctrl.getElems" md-page-select></md-table-pagination>
+</md-card>

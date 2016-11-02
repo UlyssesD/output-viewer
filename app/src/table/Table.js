@@ -2,6 +2,7 @@ import TableDataService from 'src/table/services/TableDataService';
 
 import TableData from 'src/table/components/TableData';
 
+
 // Definizione del modulo Angular 'Table'
 
 export default angular

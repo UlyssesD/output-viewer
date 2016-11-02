@@ -4,10 +4,10 @@ class TableDataController {
      * 
      * @param $log
      */
-    constructor($http, $log, $resource, TableDataService) {
+    constructor($http, $log, $mdDialog, TableDataService) {
         var self = this;
         self.$log = $log;
-
+   
         self.selected = [];
 
         self.vcf_headers = {
@@ -36,7 +36,7 @@ class TableDataController {
 
         }).catch(function() { console.log('Some error occurred') });
 
-        this.getElems = function () {
+        self.getElems = function () {
             console.log('Getting elements');
             self.query.skip = self.query.limit * (self.query.page - 1);
 
@@ -45,6 +45,33 @@ class TableDataController {
                 self.data = data;
 
             }).catch(function() { console.log('Some error occurred') });
+        }
+
+        // Metodo chiamato per visualizzare le annotazioni di una particolare variante
+        self.showAnnotations = function($event, annotations){
+            self.annotations = annotations;
+
+            var annotationDialog = {
+                title: 'Annotations for selected Variant',
+                fullscreen: true,
+                autowrap: false,
+                parent: angular.element(document.body),
+                targetEvent: $event,
+                templateUrl: './src/table/components/AnnotationDialog.html',
+                clickOutsideToClose: true,
+                controller: () => self,
+                controllerAs: '$ctrl'
+            }
+            
+            $mdDialog.show(annotationDialog)
+                .finally(function(){
+                    console.log("BUBBU'");
+                    self.annotations = null;
+                })
+        }
+
+        self.closeDialog = function() {
+            $mdDialog.hide();
         }
     }
 

@@ -6,7 +6,6 @@ export default {
     config : {
         bindings: {data: '<'},
         templateUrl: 'src/table/components/TableData.html',
-        controller: ['$http', '$log', '$resource', 'TableDataService', TableDataController ]
-
+        controller: ['$http', '$log', '$mdDialog', 'TableDataService', TableDataController ]
     }
 };

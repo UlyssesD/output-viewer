@@ -23,7 +23,7 @@
                         <td md-cell><p><ng-repeat ng-repeat="alt in elem.variant.ALT">{{alt}}{{$last ? '' : ', '}}</ng-repeat></p></td>
                         <td md-cell><p>{{elem.variant.QUAL}}</p></td>
                         <td md-cell><p>{{elem.variant.FILTER}}</p></td>  
-                        <td md-cell><p>{{elem.annotations ? 'Show details' : '-'}}</p></td>
+                        <td md-cell><md-button ng-click="$ctrl.showAnnotations($event, elem.annotations)">{{elem.annotations ? 'Show details' : '-'}}</md-button></td>
                         <td md-cell><p>{{elem.genotypes.length != 0 ? elem.genotypes.length + ' sample(s)' : '-'}}</p></td>
                     </tr>
                 </tbody>

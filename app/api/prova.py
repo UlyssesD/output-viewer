@@ -15,6 +15,8 @@ parsed_output = {
     'Data': []
 }
 
+
+
 def main(argv):
    
     # Ottengo la stringa relativa al file da processare
@@ -26,7 +28,8 @@ def main(argv):
 #    os.system("python vcf_melt.py " + input_file)
 
     print 'Opening .vcf file...'
-    reader = vcf.VCFReader(open(input_file, 'r'))
+    file = open(input_file, 'r')
+    reader = vcf.VCFReader(file)
 
     # Versione che salva le righe del file in GraphDB
     print 'Populating Database...'
@@ -37,7 +40,7 @@ def main(argv):
     session = driver.session()
 
     # Creo un nodo corrispondente al file
-    filename = 'test_vcf'
+    filename = os.path.basename(file.name)
     file_id = ''
     f = session.run("CREATE (f: File {name:'"+ filename + "'}) RETURN ID(f) as file_id")
 
@@ -49,16 +52,22 @@ def main(argv):
         variant = {
             "CHROM": record.CHROM,
             "POS": record.POS,
+            "START": record.start,
+            "END": record.end,
             "ID": record.ID or '.',
             "REF": record.REF,
             "ALT": str(record.ALT).strip('[]').split(','),
+            "AFFECTED_START": record.affected_start,
+            "AFFECTED_END": record.affected_end,
             "QUAL": record.QUAL,
             "FILTER": record.FILTER or '.',
-            "FORMAT": record.FORMAT or '.'
+            "FORMAT": record.FORMAT or '.',
+            "HETEROZIGOSITY": record.heterozygosity,
+            "MUTATION": record.var_type
         }
 
         variant_id = ''
-        v = session.run("CREATE (v: Variant {CHROM: {CHROM}, POS: {POS}, ID: {ID}, REF: {REF}, ALT: {ALT}, QUAL: {QUAL}, FILTER: {FILTER}, FORMAT: {FORMAT}}) RETURN ID(v) as variant_id", variant)
+        v = session.run("CREATE (v: Variant {CHROM: {CHROM}, POS: {POS}, START: {START}, END: {END}, ID: {ID}, REF: {REF}, ALT: {ALT}, AFFECTED_START: {AFFECTED_START}, AFFECTED_END: {AFFECTED_END}, QUAL: {QUAL}, FILTER: {FILTER}, FORMAT: {FORMAT}, HETEROZIGOSITY: {HETEROZIGOSITY}, MUTATION: {MUTATION}}) RETURN ID(v) as variant_id", variant)
 
         for res in v: variant_id = res["variant_id"]
         
@@ -69,15 +78,27 @@ def main(argv):
         })
         
         # Costruisco la stringa della lista degli attributi delle annotazioni (sono costretto a farlo perchè non ho un modo univoco per sapere a priori i campi presenti)
+        annotation = {}
         attributes = '{ '
-        for attr in record.INFO.keys():
-            attributes = attributes + '' + attr + ': {' + attr + '}, '
+        for (key, value) in record.INFO.items():
+
+
+            # Per ogni chiave considerata, formatto la stringa usata come attributo in Neo4j (necessario per questioni di queri, non accetta '.', '+' oppure stringhe numeriche)
+            #if re.match('^(\d+)', key):
+            #    key = "__number__" + key
+            
+           
+            #key = key.replace(".", "__dot__")
+            #key = key.replace("+", "__plus__")
+
+            attributes = attributes + '`' + key + '`: {`'  + key + '`}, '
+            annotation[key] = str(value).strip('[]').split(',')
 
         attributes = attributes.strip(', ') + '}'
         
         # Genero il nodo corrispondente alle annotazioni
         info_id = ''
-        i = session.run("CREATE (i: Info " + attributes + ") return ID(i) as info_id", record.INFO);
+        i = session.run("CREATE (i: Info " + attributes + ") return ID(i) as info_id", annotation);
 
         for res in i: info_id = res["info_id"]
 
@@ -91,7 +112,7 @@ def main(argv):
         format_vars = record.FORMAT.split(':')
 
         for sample in record.samples:
-            attributes = '{ sample: ' + sample.sample + ', '
+            attributes = '{ sample: "' + sample.sample + '", phased: ' + str(sample.phased) + ', state: ' + str(sample.gt_type) + ', '
             genotype = {}
 
             for i in range(len(format_vars)): 
@@ -111,7 +132,7 @@ def main(argv):
                 "variant_id": variant_id,
                 "genotype_id": genotype_id
             })
-
+            
     ''' 
     # Versione che salva le righe del file in mongoDB 
     print 'Populating Database...'

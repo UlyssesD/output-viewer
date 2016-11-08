@@ -1,5 +1,5 @@
 class TableDataController {
-    
+
     /** Costruttore
      * 
      * @param $log
@@ -7,52 +7,62 @@ class TableDataController {
     constructor($http, $log, $mdDialog, TableDataService) {
         var self = this;
         self.$log = $log;
-   
+
         self.selected = [];
 
         self.vcf_headers = {
             'CHROM': 'CHROM',
-            'POS':   'POS',
-            'ID':    'ID',
-            'REF':   'REF',
-            'ALT':   'ALT',
-            'QUAL':  'QUAL',
+            'POS': 'POS',
+            'ID': 'ID',
+            'REF': 'REF',
+            'ALT': 'ALT',
+            'QUAL': 'QUAL',
             'FILTER': 'FILTER',
             'INFO': 'INFO',
             'GENOTYPES': 'GENOTYPES'
         };
- 
+
         self.query = {
+            'file': 'U11_80M_R2.annotated.hg19_multianno.vcf',
             'limit': 5,
             'page': 1,
             'skip': 0
         };
 
 
-        self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
+        self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function (data) {
             console.log(data);
             self.data = data;
 
 
-        }).catch(function() { console.log('Some error occurred') });
+        }).catch(function () { console.log('Some error occurred') });
 
         self.getElems = function () {
             console.log('Getting elements');
             self.query.skip = self.query.limit * (self.query.page - 1);
 
-            self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
+            self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function (data) {
                 console.log(data);
                 self.data = data;
 
-            }).catch(function() { console.log('Some error occurred') });
-        }
+            }).catch(function () { console.log('Some error occurred') });
+        };
+
+        self.getSamples = function () {
+            self.displayed_samples = self.selected.genotypes.slice(5 * (self.genotypes_page - 1), Math.min(self.selected.genotypes.length, 5 * (self.genotypes_page - 1) + 5));
+            console.log("Showing more samples");
+            console.log(self.displayed_samples);
+        };
 
         // Metodo chiamato per visualizzare le annotazioni di una particolare variante
-        self.showAnnotations = function($event, annotations){
-            self.annotations = annotations;
+        self.showAnnotations = function ($event, selected) {
+
+            self.selected = selected;
+            self.genotype_headers = selected.variant.FORMAT.split(':');
+            self.genotypes_page = 1;
+            self.displayed_samples = self.selected.genotypes.slice(5 * (self.genotypes_page - 1), Math.min(self.selected.genotypes.length, 5 * (self.genotypes_page - 1) + 5));
 
             var annotationDialog = {
-                title: 'Annotations for selected Variant',
                 fullscreen: true,
                 autowrap: false,
                 parent: angular.element(document.body),
@@ -62,17 +72,20 @@ class TableDataController {
                 controller: () => self,
                 controllerAs: '$ctrl'
             }
-            
-            $mdDialog.show(annotationDialog)
-                .finally(function(){
-                    console.log("BUBBU'");
-                    self.annotations = null;
-                })
-        }
 
-        self.closeDialog = function() {
+            $mdDialog.show(annotationDialog)
+                .finally(function () {
+                    console.log("Dialog closed.");
+                    self.selected = null;
+                    self.genotype_headers = null;
+                    self.displayed_samples = null;
+                    self.genotypes_page = 1;
+                })
+        };
+
+        self.closeDialog = function () {
             $mdDialog.hide();
-        }
+        };
     }
 
 }

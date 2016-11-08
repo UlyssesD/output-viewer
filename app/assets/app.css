@@ -1,7 +1,7 @@
 .md-table tbody tr{
     transition: all 0.1s ease-in;
 }
-.md-table tbody tr:hover, .md-table tbody tr:focus {
+.md-table tbody tr:hover {
   cursor:pointer;
   background-color:rgba(63,81,181,0.2);
 }

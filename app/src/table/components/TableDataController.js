@@ -29,6 +29,11 @@ class TableDataController {
             'skip': 0
         };
 
+        TableDataService.loadFileStatistics(self.query).then(function(data) {
+            console.log(data);
+            self.statistics = data;
+
+        }).catch(function () { console.log('Some error occurred') });
 
         self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function (data) {
             console.log(data);

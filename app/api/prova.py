@@ -40,9 +40,25 @@ def main(argv):
     session = driver.session()
 
     # Creo un nodo corrispondente al file
-    filename = os.path.basename(file.name)
+    properties = {
+        "filename": os.path.basename(file.name),
+        "total": 0,
+        "hom": 0,
+        "het": 0,
+        "hom_alt": 0,
+        "uncalled": 0,
+        "snp": 0,
+        "indels": 0,
+        "unknown": 0,
+        "in_dbSNP": 0,
+        "not_in_dbSNP": 0,
+        "in_1000g": 0,
+        "not_in_1000g": 0
+    }
+
     file_id = ''
-    f = session.run("CREATE (f: File {name:'"+ filename + "'}) RETURN ID(f) as file_id")
+   
+    f = session.run("CREATE (f: File { name:{filename} }) RETURN ID(f) as file_id", properties)
 
     for res in f: file_id = res["file_id"]
 
@@ -66,6 +82,20 @@ def main(argv):
             "MUTATION": record.var_type
         }
 
+        # Aggiorno le statistiche sul file
+        properties["total"] += 1
+        properties["hom"] += record.num_hom_ref
+        properties["het"] += record.num_het
+        properties["hom_alt"] += record.num_hom_alt
+        properties["uncalled"] += record.num_unknown
+
+        if variant["MUTATION"] == 'snp':
+            properties["snp"] += 1
+        elif variant["MUTATION"]== 'indel':
+            properties["indels"] += 1
+        else:
+            properties["unknown"] += 1
+
         variant_id = ''
         v = session.run("CREATE (v: Variant {CHROM: {CHROM}, POS: {POS}, START: {START}, END: {END}, ID: {ID}, REF: {REF}, ALT: {ALT}, AFFECTED_START: {AFFECTED_START}, AFFECTED_END: {AFFECTED_END}, QUAL: {QUAL}, FILTER: {FILTER}, FORMAT: {FORMAT}, HETEROZIGOSITY: {HETEROZIGOSITY}, MUTATION: {MUTATION}}) RETURN ID(v) as variant_id", variant)
 
@@ -82,6 +112,22 @@ def main(argv):
         attributes = '{ '
         for (key, value) in record.INFO.items():
 
+            if re.match('(\w*)snp(\w*)', key):
+                session.run("MATCH (v: Variant) where ID(v) = {variant_id} set v += { dbSNP:{dbSNP} }", {
+                    "variant_id": variant_id,
+                    "dbSNP": str(value).strip('[]').split(',')
+                })
+                if str(value).strip('[]').split(',')[0] == 'None':
+                    properties['not_in_dbSNP'] += 1
+                else:
+                    properties['in_dbSNP'] += 1
+            
+            if re.match('1000g(\w*)_all', key):
+                if value:
+                    properties['in_1000g'] += 1
+                else:
+                    properties['not_in_1000g'] += 1
+                
 
             # Per ogni chiave considerata, formatto la stringa usata come attributo in Neo4j (necessario per questioni di queri, non accetta '.', '+' oppure stringhe numeriche)
             #if re.match('^(\d+)', key):
@@ -132,7 +178,10 @@ def main(argv):
                 "variant_id": variant_id,
                 "genotype_id": genotype_id
             })
-            
+
+    #salvo le proprietà calcolate nel nodo
+    session.run("MATCH (f: File {name: {filename} }) SET f += { total:{total}, hom:{hom}, het:{het}, hom_alt:{hom_alt}, uncalled:{uncalled}, snp:{snp}, indels:{indels}, unkwnown:{unknown}, in_dbSNP:{in_dbSNP}, not_in_dbSNP:{not_in_dbSNP}, in_1000g:{in_1000g}, not_in_1000g:{not_in_1000g} }", properties)
+
     ''' 
     # Versione che salva le righe del file in mongoDB 
     print 'Populating Database...'

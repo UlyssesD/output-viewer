@@ -14,6 +14,7 @@
       "angular": "github:angular/bower-angular@1.5.8",
       "angular-animate": "github:angular/bower-angular-animate@1.5.8",
       "angular-aria": "github:angular/bower-angular-aria@1.5.8",
+      "angular-bind-html-compile": "github:incuna/angular-bind-html-compile@master",
       "angular-material": "github:angular/bower-material@master",
       "angular-messages": "github:angular/bower-angular-messages@1.5.8",
       "angular-resource": "github:angular/bower-angular-resource@1.5.8",

@@ -1,7 +1,7 @@
 <!--<md-card md-colors="::{background: 'default-primary-hue-3'}">-->
 <md-card>
     <!--<img src="card-image.png" class="md-card-image" alt="image caption">-->
-    <md-card-title>
+    <md-card-title md-colors="{background: 'default-primary-hue-2'}">
         <md-card-title-text>
             <span class="md-headline">Statistics for file {{ $ctrl.statistics.name.split('.vcf')[0] }}</span>
         </md-card-title-text>
@@ -109,25 +109,20 @@
         <table md-table md-progress="$ctrl.promise">
             <thead md-head>
                 <tr md-row>
-                    <th md-column><span>Position</span></th>
-                    <th md-column><span>Allele variation</span></th>
-                    <th md-column md-numeric><span>Depth</span></th>
-                    <!--<th md-column><span>Mutation</span></th>-->
-                    <th md-column><span>Gene</span></th>
-                    <th md-column><span>Location</span></th>
-                    <th md-column><span>dbSNP</span></th>
-
-                    <th md-column><span>Quality</span></th>
-                    <th md-column><span>CQ ratio</span></th>
-                    <th md-column><span>FS</span></th>
-                    <th md-column><span>MQ0</span></th>
+                    <th md-column ng-repeat="header in $ctrl.config.headers track by $index"><span>{{ header }}</span></th>              
                 </tr>
             </thead>
             <tbody md-body>
-                <tr md-row ng-repeat="elem in $ctrl.data.variants track by $index" ng-click="$ctrl.showAnnotations($event, elem)">
+                <tr md-row ng-repeat="el in  $ctrl.data.variants track by $index" ng-click="$ctrl.showAnnotations($event, el)" bind-html-compile="$ctrl.template">
+                    <!--<ng-include src="$ctrl.config.template"></ng-include>-->
+                </tr>
+ 
+                <!--<tr md-row ng-repeat="elem in $ctrl.data.variants track by $index" ng-click="$ctrl.showAnnotations($event, elem)">
+                    
                     <td md-cell>
                         <p>{{elem.variant.CHROM}}:{{elem.variant.START}}-{{elem.variant.END}}</p>
                     </td>
+                    <td md-cell ng-bind-html="$ctrl.config.row"></td>
                     <td md-cell>
                         <p>
                             {{elem.variant.REF}}
@@ -138,7 +133,7 @@
                     <td md-cell>
                         <p>{{elem.annotations.DP[0]}}</p>
                     </td>
-                    <!--<td md-cell><p>{{elem.variant.MUTATION | uppercase}}</p></td>-->
+                   
                     <td md-cell>
                         <p>
                             <ng-repeat ng-repeat="gene in elem.annotations['Gene.refGene']">{{gene}}{{$last ? '' : ', '}}</ng-repeat>
@@ -162,7 +157,7 @@
                     </td>
                     <td md-cell>
                         <p>{{elem.annotations.MQ0[0]}}</p>
-                    </td>
+                    </td>-->
                 </tr>
             </tbody>
         </table>

@@ -1,3 +1,11 @@
+.logo {
+  max-height: 192px;
+}
+
+.logo-name {
+  text-align: center;
+}
+
 .md-table tbody tr{
     transition: all 0.1s ease-in;
 }

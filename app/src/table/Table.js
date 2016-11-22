@@ -6,7 +6,7 @@ import TableData from 'src/table/components/TableData';
 // Definizione del modulo Angular 'Table'
 
 export default angular
-    .module("table", ['ngMaterial', 'md.data.table'])
+    .module("table", ['ngMaterial', 'angular-bind-html-compile', 'md.data.table'])
 
     .component(TableData.name, TableData.config)
     

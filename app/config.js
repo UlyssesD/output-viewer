@@ -17,11 +17,13 @@ System.config({
     "angular": "github:angular/bower-angular@1.5.8",
     "angular-animate": "github:angular/bower-angular-animate@1.5.8",
     "angular-aria": "github:angular/bower-angular-aria@1.5.8",
+    "angular-bind-html-compile": "github:incuna/angular-bind-html-compile@master",
     "angular-material": "github:angular/bower-material@master",
     "angular-messages": "github:angular/bower-angular-messages@1.5.8",
     "angular-mocks": "github:angular/bower-angular-mocks@1.5.8",
     "angular-resource": "github:angular/bower-angular-resource@1.5.8",
     "angular-route": "github:angular/bower-angular-route@1.5.8",
+    "angular-sanitize": "github:angular/bower-angular-sanitize@1.5.8",
     "css": "github:systemjs/plugin-css@0.1.29",
     "json": "github:systemjs/plugin-json@0.1.2",
     "md-data-table": "github:daniel-nagy/md-data-table@master",
@@ -42,6 +44,9 @@ System.config({
       "angular": "github:angular/bower-angular@1.5.8"
     },
     "github:angular/bower-angular-route@1.5.8": {
+      "angular": "github:angular/bower-angular@1.5.8"
+    },
+    "github:angular/bower-angular-sanitize@1.5.8": {
       "angular": "github:angular/bower-angular@1.5.8"
     },
     "github:angular/bower-material@master": {

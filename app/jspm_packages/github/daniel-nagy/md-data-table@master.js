@@ -1,0 +1,1 @@
+module.exports = require("github:daniel-nagy/md-data-table@master/index.js");

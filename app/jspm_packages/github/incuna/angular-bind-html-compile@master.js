@@ -1,0 +1,1 @@
+module.exports = require("github:incuna/angular-bind-html-compile@master/angular-bind-html-compile.js");

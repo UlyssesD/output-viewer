@@ -1,4 +1,4 @@
-<md-dialog >
+<md-dialog md-colors="{background: 'default-grey-200'}">
   <md-toolbar>
     <div class="md-toolbar-tools">
       <h2>Detailed Summary</h2>
@@ -10,22 +10,22 @@
   </md-toolbar>
   <md-dialog-content style="position:relative;width:800px;max-height:810px;">
 
-    <md-tabs md-border-bottom md-center-tabs md-dynamic-height>
+    <md-tabs md-border-bottom md-center-tabs md-dynamic-height   class="md-primary md-hue-2">
       <md-tab label="Variant">
-        <md-content class="md-padding">
+        <md-content class="md-padding"  md-colors="{background: 'default-grey-200'}">
           <div layout="row">
             <div flex-gt-sm="50">
               <md-list flex>
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>Position</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Position</h3>
                     <p>{{$ctrl.selected.variant.CHROM}}:{{$ctrl.selected.variant.START}}-{{$ctrl.selected.variant.END}}</p>
                   </div>
                 </md-list-item>
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>Allele variation</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Allele variation</h3>
                     <p>
                       {{$ctrl.selected.variant.REF}}
                       <md-icon md-font-set="material-icons"> trending_flat </md-icon>
@@ -36,14 +36,14 @@
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>Depth</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Depth</h3>
                     <p>{{$ctrl.selected.annotations.DP[0]}}</p>
                   </div>
                 </md-list-item>
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>Gene</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Gene</h3>
                     <p>
                       <ng-repeat ng-repeat="gene in $ctrl.selected.annotations['Gene.refGene']">{{gene}}{{$last ? '' : ', '}}</ng-repeat>
                     </p>
@@ -52,7 +52,7 @@
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>Location</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Location</h3>
                     <p>{{ $ctrl.selected.annotations['Func.refGene'][0]}}</p>
                   </div>
                 </md-list-item>
@@ -63,7 +63,7 @@
               <md-list flex>
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>dbSNP</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">dbSNP</h3>
                     <p>{{$ctrl.selected.annotations['snp138NonFlagged'][0] != "None" ? $ctrl.selected.annotations['snp138NonFlagged'][0]
                       : '-' }}</p>
                   </div>
@@ -71,28 +71,28 @@
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>Quality</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Quality</h3>
                     <p>{{$ctrl.selected.variant.QUAL}}</p>
                   </div>
                 </md-list-item>
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>CQ Ratio</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">CQ Ratio</h3>
                     <p>{{$ctrl.selected.annotations.QD[0]}}</p>
                   </div>
                 </md-list-item>
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>FS</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">FS</h3>
                     <p>{{$ctrl.selected.annotations.FS[0]}}</p>
                   </div>
                 </md-list-item>
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
-                    <h3>MQ0</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">MQ0</h3>
                     <p>{{ $ctrl.selected.annotations.MQ0[0]}}</p>
                   </div>
                 </md-list-item>
@@ -103,13 +103,13 @@
       </md-tab>
 
       <md-tab label="Annotations">
-        <md-content class="md-padding">
+        <md-content class="md-padding"  md-colors="{background: 'default-grey-200'}">
           <div layout="row">
             <div flex-gt-sm="50">
               <md-list flex>
                 <md-list-item class="md-2-line" ng-repeat="(name, value) in $ctrl.selected.annotations track by $index" ng-if="$even">
                   <div class="md-list-item-text">
-                    <h3>{{name}}</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">{{name}}</h3>
                     <p>{{value}}</p>
                   </div>
                 </md-list-item>
@@ -121,7 +121,7 @@
               <md-list flex>
                 <md-list-item class="md-2-line" ng-repeat="(name, value) in $ctrl.selected.annotations track by $index" ng-if="$odd">
                   <div class="md-list-item-text">
-                    <h3>{{name}}</h3>
+                    <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">{{name}}</h3>
                     <p>{{value}}</p>
                   </div>
                 </md-list-item>
@@ -132,15 +132,15 @@
       </md-tab>
 
       <md-tab label="Genotypes">
-        <md-content class="md-padding">
+        <md-content class="md-padding"  md-colors="{background: 'default-grey-200'}">
          <md-table-container>
             <table md-table md-progress="$ctrl.promise">
               <thead md-head>
-                    <tr md-row>
-                        <th md-column><span>Sample</span></th>
-                        <th md-column><span>Phased</span></th>
-                        <th md-column><span>State</span></th>
-                        <th md-column ng-repeat="name in $ctrl.genotype_headers"><span>{{name}}</span></th> 
+                    <tr md-row >
+                        <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">Sample</span></th>
+                        <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">Phased</span></th>
+                        <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">State</span></th>
+                        <th md-column ng-repeat="name in $ctrl.genotype_headers"><span md-colors="{color: 'default-primary-hue-2-0.87'}">{{name}}</span></th> 
                     </tr>
                 </thead> 
                 <tbody md-body>

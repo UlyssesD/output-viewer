@@ -5,6 +5,7 @@ System.config({
     "app/*": "src/*.js",
     "menu/*": "src/menu/*.js",
     "table/*": "src/table/*.js",
+    "statistics/*": "src/statistics/*.js",
     "upload/*": "upload/*",
     "material-start/*": "src/*.js",
     "github:*": "jspm_packages/github/*",

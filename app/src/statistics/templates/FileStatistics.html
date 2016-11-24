@@ -1,0 +1,17 @@
+<md-sidenav layout="column" md-component-id="right" class="md-sidenav-right md-whiteframe-4dp" flex>
+    <md-toolbar layout="row" layout-align="center center" class="md-whiteframe-4dp md-accent md-medium-tall" >
+        <span flex></span>
+        <h3 class="md-toolbar-tools"><span class="md-flex">Statistics</span></h3>
+    </md-toolbar>
+
+    <md-content layout="row" md-colors="{background: 'default-grey-200'}">
+
+        <md-list flex >
+            <ng-repeat ng-repeat="el in $ctrl.config.elements track by $index">
+                <md-subheader class="md-sticky" md-colors="{background: 'default-accent-hue-2'}">{{el.header}}</md-subheader>
+                <ng-repeat ng-repeat="stat in el.values track by $index" bind-html-compile="stat">
+                </ng-repeat>
+            </ng-repeat>
+        </md-list>
+    </md-content>
+</md-sidenav>

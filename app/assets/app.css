@@ -2,6 +2,10 @@
   max-height: 192px;
 }
 
+.banner {
+  max-height: 100px;
+}
+
 .logo-name {
   text-align: center;
 }

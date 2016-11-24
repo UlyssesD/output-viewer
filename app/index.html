@@ -15,40 +15,59 @@
   <link rel="stylesheet" href="./assets/app.css" />
 </head>
 
-<body ng-cloak layout="row" ng-controller="AppController as app">
+<body ng-cloak layout="column" ng-controller="AppController as app" md-colors="{background: 'default-grey-200'}">
 
+  <!-- Barra applicazione (fissa) -->
+  <md-toolbar layout="row" class="md-medium-tall md-whiteframe-8dp" md-colors="{background: 'primary', color: 'background-A100' }">
+    <section layout="row" flex="15" layout-align="center center">
+      <img src="./assets/svg/logo.svg" class="banner">
+      <h1><span>Output</span> <span>Viewer</span></h1>
+    </section>
 
-    <md-sidenav class="md-whiteframe-4dp" md-colors="{background: 'default-primary'}" md-is-locked-open="$mdMedia('gt-sm')" md-component-id="left" ng-click="app.toggleList()">
+    <section flex="85">
+    </section>
+  </md-toolbar>
 
-      <img src="./assets/svg/logo.svg" class="logo">
-      <h2 class="logo-name">Output Viewer</h2>
-      <md-divider></md-divider>
-      <menu-list menu-items="app.menuItems" selected="app.selected" on-selected="app.logItem(item)">
-      </menu-list>
+  <md-toolbar layout="row" class="md-toolbar-tools md-whiteframe-4dp" md-colors="{background: 'default-primary-hue-2', color: 'background-A100'}">
+    <section flex="15">
 
-    </md-sidenav>
+    </section>
+    <section flex="70">
+      <h1>
+        <span>My files</span>
+        <md-icon class="material-icons" md-font-set='material-icons' style="color: white">chevron_right</md-icon>
+        <span>U11_80M_R2.annotated.hg19_multianno</span>
+      </h1>
 
-  <div layout="column" flex>
-     <!-- Container #1 (see wireframe) -->
-    <md-toolbar layout="row" class="md-toolbar-tools md-whiteframe-2dp" md-colors="{background: 'default-primary-hue-2'}">
-      <md-button class="menu md-icon-button" hide-gt-sm ng-click="app.toggleList()" aria-label="Show User List">
-        <md-icon md-svg-icon="menu_icon"></md-icon>
+    </section>
+    <section flex="15" layout="row" layout-align="end center">
+
+      <md-button class="md-raised md-accent" ng-click="app.openStatistics()">
+        Statistics
       </md-button>
-      <h1>Output Viewer</h1>
-    </md-toolbar>
+    </section>
+  </md-toolbar>
 
+  <section layout="row" flex>
+
+    <section layout="column" flex="15">
+      <menu-list menu-items="app.menuItems" selected="app.selected" on-selected="app.logItem(item)"></menu-list>
+    </section>
+
+    <md-divider></md-divider>
     <!-- Container #2 -->
 
     <!-- Container #3 -->
+    <md-content layout="column" flex="85" md-colors="{background: 'default-grey-200'}">
+      <!-- Container #4 -->
+      <!--<div flex layout="row">-->
 
-
-
-    <!-- Container #4 -->
-    <!--<div flex layout="row">-->
-    <md-content>
       <table-data></table-data>
     </md-content>
-  </div>
+
+  </section>
+
+  <file-statistics></file-statistics>
   <!--      
       <div flex=30 layout="column">  
         <md-card>-->

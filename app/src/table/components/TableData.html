@@ -1,168 +1,17 @@
-<!--<md-card md-colors="::{background: 'default-primary-hue-3'}">-->
-<md-card>
-    <!--<img src="card-image.png" class="md-card-image" alt="image caption">-->
-    <md-card-title md-colors="{background: 'default-primary-hue-2'}">
-        <md-card-title-text>
-            <span class="md-headline">Statistics for file {{ $ctrl.statistics.name.split('.vcf')[0] }}</span>
-        </md-card-title-text>
-    </md-card-title>
-    <md-card-content md-padding>
-        <md-divider></md-divider>
-
-        <md-list layout="row" flex>
-
-            <md-subheader class="md-no-sticky">General</md-subheader>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.total }}</h3>
-                    <p>elements</p>
-                </div>
-            </md-list-item>
-
-            <md-subheader class="md-no-sticky">Mutations</md-subheader>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.snp }}</h3>
-                    <p>snp</p>
-                </div>
-            </md-list-item>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.indels }}</h3>
-                    <p>indels</p>
-                </div>
-            </md-list-item>
-            <md-list-item class="md-2-line" ng-if="$ctrl.statistics.unkwnown != 0">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.unkwnown }}</h3>
-                    <p>unknowns</p>
-                </div>
-            </md-list-item>
-
-            <md-subheader class="md-no-sticky">Condition</md-subheader>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.hom }}</h3>
-                    <p>homozygous (ref)</p>
-                </div>
-            </md-list-item>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.hom_alt }}</h3>
-                    <p>homozygous (alt)</p>
-                </div>
-            </md-list-item>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.het }}</h3>
-                    <p>heterozygous</p>
-                </div>
-            </md-list-item>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.uncalled }}</h3>
-                    <p>uncalled</p>
-                </div>
-            </md-list-item>
-
-        </md-list>
-
-        <md-divider></md-divider>
-
-        <md-list layout="row" flex=50>
-
-            <md-subheader class="md-no-sticky">dbSNP</md-subheader>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.in_dbSNP }}</h3>
-                    <p>in dbSNP</p>
-                </div>
-            </md-list-item>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.not_in_dbSNP }}</h3>
-                    <p>not in dbSNP</p>
-                </div>
-            </md-list-item>
-
-            <md-subheader class="md-no-sticky">1000g</md-subheader>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.in_1000g }}</h3>
-                    <p>in 1000g</p>
-                </div>
-            </md-list-item>
-            <md-list-item class="md-2-line">
-                <div class="md-list-item-text">
-                    <h3>{{ $ctrl.statistics.not_in_1000g }}</h3>
-                    <p>not in 1000g</p>
-                </div>
-            </md-list-item>
-
-        </md-list>
-
-    </md-card-content>
-</md-card>
-
 <md-card>
     <md-table-container>
         <table md-table md-progress="$ctrl.promise">
             <thead md-head>
                 <tr md-row>
-                    <th md-column ng-repeat="header in $ctrl.config.headers track by $index"><span>{{ header }}</span></th>              
+                    <th md-column ng-repeat="header in $ctrl.config.headers track by $index"><span md-colors="{color: 'default-primary-hue-2'}">{{ header }}</span></th>
                 </tr>
             </thead>
             <tbody md-body>
-                <tr md-row ng-repeat="el in  $ctrl.data.variants track by $index" ng-click="$ctrl.showAnnotations($event, el)" bind-html-compile="$ctrl.template">
-                    <!--<ng-include src="$ctrl.config.template"></ng-include>-->
-                </tr>
- 
-                <!--<tr md-row ng-repeat="elem in $ctrl.data.variants track by $index" ng-click="$ctrl.showAnnotations($event, elem)">
-                    
-                    <td md-cell>
-                        <p>{{elem.variant.CHROM}}:{{elem.variant.START}}-{{elem.variant.END}}</p>
-                    </td>
-                    <td md-cell ng-bind-html="$ctrl.config.row"></td>
-                    <td md-cell>
-                        <p>
-                            {{elem.variant.REF}}
-                            <md-icon md-font-set="material-icons"> trending_flat </md-icon>
-                            <ng-repeat ng-repeat="alt in elem.variant.ALT">{{alt}}{{$last ? '' : ', '}}</ng-repeat>
-                        </p>
-                    </td>
-                    <td md-cell>
-                        <p>{{elem.annotations.DP[0]}}</p>
-                    </td>
-                   
-                    <td md-cell>
-                        <p>
-                            <ng-repeat ng-repeat="gene in elem.annotations['Gene.refGene']">{{gene}}{{$last ? '' : ', '}}</ng-repeat>
-                        </p>
-                    </td>
-                    <td md-cell>
-                        <p>{{elem.annotations['Func.refGene'][0]}}</p>
-                    </td>
-                    <td md-cell>
-                        <p>{{elem.variant.dbSNP[0] != "None" ? elem.variant.dbSNP[0] : '-' }}</p>
-                    </td>
-
-                    <td md-cell>
-                        <p>{{elem.variant.QUAL}}</p>
-                    </td>
-                    <td md-cell>
-                        <p>{{elem.annotations.QD[0]}}</p>
-                    </td>
-                    <td md-cell>
-                        <p>{{elem.annotations.FS[0]}}</p>
-                    </td>
-                    <td md-cell>
-                        <p>{{elem.annotations.MQ0[0]}}</p>
-                    </td>-->
-                </tr>
+                <tr md-row ng-repeat="el in  $ctrl.data.variants track by $index" ng-click="$ctrl.showAnnotations($event, el)" bind-html-compile="$ctrl.template"></tr>
             </tbody>
         </table>
     </md-table-container>
 
     <md-table-pagination md-boundary-links md-limit="$ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="$ctrl.query.page"
-        md-total="{{$ctrl.data.count}}" md-on-paginate="$ctrl.getElems" md-page-select></md-table-pagination>
+        md-total="{{$ctrl.data.count}}" md-on-paginate="$ctrl.getElems" md-page-select ></md-table-pagination>
 </md-card>

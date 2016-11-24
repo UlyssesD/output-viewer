@@ -1,0 +1,41 @@
+{
+    "elements": [
+        {
+            "header": "General",
+            "values": [
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.total }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">elements</p></div></md-list-item>"
+            ]
+        },
+        {
+            "header": "Mutations",
+            "values": [
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.snp }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">snp</p></div> </md-list-item><md-divider inset></md-divider>",
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.indels }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">indels</p></div></md-list-item><md-divider inset></md-divider>",
+                "<md-list-item class='md-2-line' ng-if='$ctrl.data.unkwnown != 0'><div class='md-list-item-text'><h3>{{ $ctrl.data.unkwnown }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">unknowns</p></div></md-list-item>"
+            ]
+        },
+        {
+            "header": "Condition",
+            "values": [
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.hom }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">homozygous (ref)</p></div></md-list-item><md-divider inset></md-divider>",
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.hom_alt }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">homozygous (alt)</p></div></md-list-item><md-divider inset></md-divider>",
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.het }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">heterozygous</p></div></md-list-item><md-divider inset></md-divider>",
+                "<md-list-item class='md-2-line'  ng-if='$ctrl.data.uncalled != 0'><div class='md-list-item-text'><h3>{{ $ctrl.data.uncalled }}</h3 md-colors=\"{color: 'default-primary-hue-2-0.87'}\"><p>uncalled</p></div></md-list-item>"
+            ]
+        },
+        {
+            "header": "dbSNP",
+            "values": [
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.in_dbSNP }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">in dbSNP</p></div></md-list-item><md-divider inset></md-divider>",
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.not_in_dbSNP }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">not in dbSNP</p></div></md-list-item>"
+            ]
+        },
+        {
+            "header": "1000 Genomes",
+            "values": [
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.in_1000g }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">in 1000g</p></div></md-list-item><md-divider inset></md-divider>",
+                "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.not_in_1000g }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">not in 1000g</p></div></md-list-item>"
+            ]
+        }
+    ]
+}

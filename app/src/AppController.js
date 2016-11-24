@@ -11,7 +11,8 @@ function AppController( MenuDataService, TableDataService, Upload, $mdSidenav) {
     self.selected     = null;
     self.menuItems    = [ ];
     self.logItem      = logItem;
-    self.toggleList   = toggleMenuList;
+    self.openStatistics   = openStatistics;
+
 /*
     TableDataService.loadVariantsFromQuery({
             'limit': 5,
@@ -99,8 +100,8 @@ function AppController( MenuDataService, TableDataService, Upload, $mdSidenav) {
     /**
      * Hide or Show the 'left' sideNav area
      */
-    function toggleMenuList() {
-        $mdSidenav('left').toggle();
+    function openStatistics() {
+        $mdSidenav('right').toggle();
     }
 
 }

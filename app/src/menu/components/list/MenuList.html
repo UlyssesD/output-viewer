@@ -1,5 +1,8 @@
-<md-list>
-  <md-list-item ng-repeat="item in $ctrl.menuItems" flex aria-label="{{item.name}}" ng-click="$ctrl.selectItem({item:item})" ng-class="{ 'md-accent': item === $ctrl.selected }">
-    {{item.name}}
+<md-list class="md-dense">
+  <md-list-item ng-repeat="item in $ctrl.menuItems" flex aria-label="{{item.name}}" ng-click="$ctrl.selectItem({item:item})"
+    ng-class="{ 'md-accent': item === $ctrl.selected }">
+      <md-icon md-svg-icon="menu_icon"></md-icon>
+      <p>{{item.name}}</p>
+    </div>
   </md-list-item>
 </md-list>

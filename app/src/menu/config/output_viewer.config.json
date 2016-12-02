@@ -1,0 +1,9 @@
+{
+    "elements": [
+        {
+            "name": "My files",
+            "icon": "menu_icon",
+            "href": "#myFiles"
+        }
+    ]
+}

@@ -12,7 +12,7 @@
         "MQ0"
     ],
     "row": [
-        "<td md-cell><p>{{el.variant.CHROM}}:{{el.variant.START}}-{{el.variant.END}}</p></td>",
+        "<td md-cell><p>{{el.variant.CHROM}}:{{el.variant.POS}}-{{el.variant.END}}</p></td>",
         "<td md-cell><p>{{el.variant.REF}}<md-icon md-font-set='material-icons'> trending_flat </md-icon><ng-repeat ng-repeat='alt in el.variant.ALT'>{{alt}}{{$last ? '' : ', '}}</ng-repeat></p></td>",
         "<td md-cell><p>{{el.annotations.DP[0]}}</p></td>",
         "<td md-cell><p><ng-repeat ng-repeat='gene in el.annotations[\"Gene.refGene\"]'>{{gene}}{{$last ? '' : ', '}}</ng-repeat></p></td>",

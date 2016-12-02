@@ -3,7 +3,7 @@
 }
 
 .banner {
-  max-height: 100px;
+  max-height: 2 00px;
 }
 
 .logo-name {
@@ -16,4 +16,14 @@
 .md-table tbody tr:hover {
   cursor:pointer;
   background-color:rgba(63,81,181,0.2);
+}
+.tabs-wrapper {
+    position: relative;
+}
+.full-size {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
 }

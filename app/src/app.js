@@ -16,10 +16,12 @@ import AppController from 'src/AppController';
 
 //import Users from 'src/users/Users';
 import Menu from 'src/menu/Menu';
-import Table from 'src/table/Table';
-import Statistics from 'src/statistics/statistics';
+import Explorer from 'src/explorer/Explorer';
 
-export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Table.name, Statistics.name ] )
+import Table from 'src/table/Table';
+import Statistics from 'src/statistics/Statistics';
+
+export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Table.name, Statistics.name ] )
   .config(($routeProvider, $mdIconProvider, $mdThemingProvider) => {
 
     $mdIconProvider
@@ -30,6 +32,22 @@ export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMater
       .primaryPalette('cyan')
       .accentPalette('amber')
       .backgroundPalette('grey');
+    
+
+    // Route definitions
+    $routeProvider
+    .when("/", {
+      templateUrl: "pages/myFiles.htm"
+    })
+    .when("/myFiles", {
+      templateUrl: "pages/myFiles.htm" 
+    })
+    .when("/details/:filename", {
+      templateUrl: "pages/fileDetails.htm"
+    })
+    .otherwise({
+        redirectTo: '/'
+    });
 
   })
   .controller('AppController', AppController);

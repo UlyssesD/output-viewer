@@ -7,7 +7,7 @@
                 </tr>
             </thead>
             <tbody md-body>
-                <tr md-row ng-repeat="el in  $ctrl.data.variants track by $index" ng-click="$ctrl.showAnnotations($event, el)" bind-html-compile="$ctrl.template"></tr>
+                <tr md-row ng-repeat="el in  $ctrl.data.elements track by $index" ng-click="$ctrl.showAnnotations($event, el)" bind-html-compile="$ctrl.template"></tr>
             </tbody>
         </table>
     </md-table-container>

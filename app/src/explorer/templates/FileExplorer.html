@@ -1,0 +1,12 @@
+<section layout="row">
+        <md-list flex>
+            <ng-repeat ng-repeat="el in $ctrl.data.elements track by $index">
+                <md-list-item href="#details/{{el.name}}" flex aria-label="{{el.name}}">
+                    <p>{{el.name}}</p>
+                    </div>
+                </md-list-item>
+            </ng-repeat>
+        </md-list>
+    </md-card-content>
+
+</section>

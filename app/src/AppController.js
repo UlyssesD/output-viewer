@@ -8,9 +8,7 @@
 function AppController( MenuDataService, TableDataService, Upload, $mdSidenav) {
     var self = this;
     //self.data         = null;
-    self.selected     = null;
-    self.menuItems    = [ ];
-    self.logItem      = logItem;
+
     self.openStatistics   = openStatistics;
 
 /*
@@ -81,22 +79,10 @@ function AppController( MenuDataService, TableDataService, Upload, $mdSidenav) {
         });
 
 */   
-    // Caricamento dell'elenco delle opzioni del menu
-    MenuDataService
-            .loadAllItems()
-            .then( function (items) {
-            self.menuItems = [].concat(items);
-            self.selected = items[0];
-            });
-
     // *********************************
     // Internal methods
     // *********************************
 
-    function logItem( item ) {
-        console.log(item.name + ' clicked!');
-        self.selected = angular.isNumber(item) ? $scope.menuItems[item] : item;
-    }
     /**
      * Hide or Show the 'left' sideNav area
      */

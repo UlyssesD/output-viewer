@@ -1,0 +1,13 @@
+<section layout="row" flex>
+    <md-card>
+        <!--<img src="card-image.png" class="md-card-image" alt="image caption">-->
+        <md-card-content>
+            <h2>Seleziona un file</h2>
+            <p>Selezionare il file che si intende visualizzare.</p>
+        </md-card-content>
+        <md-card-actions layout="row" layout-align="end center">
+            <md-button ngf-select="app.upload($file)">Seleziona</md-button>
+        </md-card-actions>
+    </md-card>
+</section>
+<file-explorer></file-explorer>

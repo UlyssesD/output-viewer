@@ -4,8 +4,8 @@ import FileStatisticsService from './../services/FileStatisticsService';
 export default {
     name : 'fileStatistics',
     config : {
-        bindings: {data: '<'},
+        bindings: { data: '<' },
         templateUrl: 'src/statistics/templates/FileStatistics.html',
-        controller: ['$http', '$log', 'FileStatisticsService', FileStatisticsController ]
+        controller: [ '$http', '$routeParams', '$log', 'FileStatisticsService', FileStatisticsController ]
     }
 };

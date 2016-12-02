@@ -4,28 +4,31 @@ class TableDataController {
      * 
      * @param $log
      */
-    constructor($http, $log, $mdDialog, TableDataService) {
+    constructor($http, $routeParams, $log, $mdDialog, TableDataService) {
         var self = this;
         self.$log = $log;
 
         self.selected = [];
-
+        self.selectedIndex = 0;
         self.config = {};
         self.rows = [];
 
         self.query = {
-            'file': 'U11_80M_R2.annotated.hg19_multianno.vcf',
+            'file': $routeParams.filename,
             'limit': 5,
             'page': 1,
             'skip': 0
         };
+
+
+        console.log($routeParams);
 
         // Caricamento del file di config
         $http.get('src/table/config/vcf.config.json')
             .then(
 
             function (response) {
-                console.log("Loaded configuration file");
+                console.log("Loaded tableData configuration file");
                 self.config = response.data;
 
                 console.log(self.config);

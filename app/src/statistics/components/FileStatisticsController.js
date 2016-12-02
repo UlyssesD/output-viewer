@@ -4,14 +4,14 @@ class FileStatisticsController {
      * 
      * @param $log
      */
-    constructor($http, $log, FileStatisticsService) {
+    constructor($http, $routeParams, $log, FileStatisticsService) {
         var self = this;
         self.$log = $log;
 
         self.config = {};
 
         self.query = {
-            'file': 'U11_80M_R2.annotated.hg19_multianno.vcf'
+            'file': $routeParams.filename
         }
 
         // Caricamento del file di config
@@ -19,7 +19,7 @@ class FileStatisticsController {
             .then(
 
             function (response) {
-                console.log("Loaded configuration file");
+                console.log("Loaded FileStatistics configuration file");
                 self.config = response.data;
 
                 console.log(self.config);

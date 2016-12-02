@@ -1,25 +1,27 @@
-<md-dialog md-colors="{background: 'default-grey-200'}">
-  <md-toolbar>
-    <div class="md-toolbar-tools">
-      <h2>Detailed Summary</h2>
+<md-dialog md-colors="{background: 'default-grey-200'}" >
+  <md-toolbar layout="row" class="md-whiteframe-4dp">
+    <div class="md-toolbar-tools" >
+      <h2 style="color: white">Detailed Summary</h2>
       <span flex></span>
       <md-button class="md-icon-button" ng-click="$ctrl.closeDialog()">
-        <md-icon md-font-set="material-icons"> clear </md-icon>
+        <md-icon md-font-set="material-icons" style="color: white"> clear </md-icon>
       </md-button>
     </div>
   </md-toolbar>
-  <md-dialog-content style="position:relative;width:800px;max-height:810px;">
 
-    <md-tabs md-border-bottom md-center-tabs md-dynamic-height   class="md-primary md-hue-2">
-      <md-tab label="Variant">
-        <md-content class="md-padding"  md-colors="{background: 'default-grey-200'}">
-          <div layout="row">
-            <div flex-gt-sm="50">
+  <md-dialog-content layout="column" style="position:relative;width:800px;max-height:810px;" layout-fill>
+    
+    <md-tabs md-border-bottom md-dynamic-height md-center-tabs class="md-primary md-hue-2" >
+      <md-tab label="Variant" flex>
+
+        <md-content class="md-padding" md-colors="{background: 'default-grey-200'}" style="max-height: 810px;" layout="row">
+
+            <div layout="column" flex="50">
               <md-list flex>
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Position</h3>
-                    <p>{{$ctrl.selected.variant.CHROM}}:{{$ctrl.selected.variant.START}}-{{$ctrl.selected.variant.END}}</p>
+                    <p>{{$ctrl.selected.variant.CHROM}}:{{$ctrl.selected.variant.POS}}-{{$ctrl.selected.variant.END}}</p>
                   </div>
                 </md-list-item>
 
@@ -98,14 +100,14 @@
                 </md-list-item>
               </md-list>
             </div>
-          </div>
+
         </md-content>
       </md-tab>
 
       <md-tab label="Annotations">
-        <md-content class="md-padding"  md-colors="{background: 'default-grey-200'}">
+        <md-content class="md-padding" md-colors="{background: 'default-grey-200'}" flex>
           <div layout="row">
-            <div flex-gt-sm="50">
+            <div  layout="column" flex="50">
               <md-list flex>
                 <md-list-item class="md-2-line" ng-repeat="(name, value) in $ctrl.selected.annotations track by $index" ng-if="$even">
                   <div class="md-list-item-text">
@@ -132,32 +134,47 @@
       </md-tab>
 
       <md-tab label="Genotypes">
-        <md-content class="md-padding"  md-colors="{background: 'default-grey-200'}">
-         <md-table-container>
+        <md-content class="md-padding" md-colors="{background: 'default-grey-200'}" flex>
+          <md-table-container>
             <table md-table md-progress="$ctrl.promise">
               <thead md-head>
-                    <tr md-row >
-                        <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">Sample</span></th>
-                        <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">Phased</span></th>
-                        <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">State</span></th>
-                        <th md-column ng-repeat="name in $ctrl.genotype_headers"><span md-colors="{color: 'default-primary-hue-2-0.87'}">{{name}}</span></th> 
-                    </tr>
-                </thead> 
-                <tbody md-body>
-                  <tr md-row ng-repeat="sample in $ctrl.displayed_samples track by $index" ng-switch on="sample.state">
-                    <td md-cell><p>{{sample.sample}}</p></td>
-                    <td md-cell><p>{{sample.phased}}</p></td>
-                    <td md-cell ng-switch-when='0'><p>hom_ref</p></td>
-                    <td md-cell ng-switch-when='1'><p>het</p></td>
-                    <td md-cell ng-switch-when='2'><p>hom_alt</p></td>
-                    <td md-cell ng-switch-when='None'><p>uncalled</p></td>
-                    <td md-cell ng-repeat="idx in $ctrl.genotype_headers"><p>{{sample[idx]}}</p></td>
-                  </tr>
-                </tbody>
+                <tr md-row>
+                  <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">Sample</span></th>
+                  <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">Phased</span></th>
+                  <th md-column><span md-colors="{color: 'default-primary-hue-2-0.87'}">State</span></th>
+                  <th md-column ng-repeat="name in $ctrl.genotype_headers"><span md-colors="{color: 'default-primary-hue-2-0.87'}">{{name}}</span></th>
+                </tr>
+              </thead>
+              <tbody md-body>
+                <tr md-row ng-repeat="sample in $ctrl.displayed_samples track by $index" ng-switch on="sample.state">
+                  <td md-cell>
+                    <p>{{sample.sample}}</p>
+                  </td>
+                  <td md-cell>
+                    <p>{{sample.phased}}</p>
+                  </td>
+                  <td md-cell ng-switch-when='0'>
+                    <p>hom_ref</p>
+                  </td>
+                  <td md-cell ng-switch-when='1'>
+                    <p>het</p>
+                  </td>
+                  <td md-cell ng-switch-when='2'>
+                    <p>hom_alt</p>
+                  </td>
+                  <td md-cell ng-switch-when='None'>
+                    <p>uncalled</p>
+                  </td>
+                  <td md-cell ng-repeat="idx in $ctrl.genotype_headers">
+                    <p>{{sample[idx]}}</p>
+                  </td>
+                </tr>
+              </tbody>
             </table>
 
-            <md-table-pagination md-boundary-links md-limit="5"  md-page="$ctrl.genotypes_page" md-total="{{$ctrl.selected.genotypes.length}}" md-on-paginate="$ctrl.getSamples" md-page-select></md-table-pagination>
-        </md-table-container>
+            <md-table-pagination md-boundary-links md-limit="5" md-page="$ctrl.genotypes_page" md-total="{{$ctrl.selected.genotypes.length}}"
+              md-on-paginate="$ctrl.getSamples" md-page-select></md-table-pagination>
+          </md-table-container>
         </md-content>
       </md-tab>
     </md-tabs>

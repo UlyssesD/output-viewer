@@ -45,17 +45,17 @@ class TableDataService {
         // Metodo chiamato una volta ottenute le varianti dal database. Riorganizzo i dati prima di passarli alla vista
         self.variantRetrieved = function (response) {
             console.log('Data successfully retrieved');
-
+            
             var data = {
                 count: 0,
-                variants: []
+                elements: []
             };
 
             data.count = response.data.results[0].data[0].row[0].total;
 
             for (var idx = 0; idx < response.data.results[0].data.length; idx++) {
 
-                data.variants.push({
+                data.elements.push({
                     variant: response.data.results[0].data[idx].row[0].variant,
                     annotations: response.data.results[0].data[idx].row[0].annotations,
                     genotypes: response.data.results[0].data[idx].row[0].genotypes

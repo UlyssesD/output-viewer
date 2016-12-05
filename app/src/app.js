@@ -17,11 +17,12 @@ import AppController from 'src/AppController';
 //import Users from 'src/users/Users';
 import Menu from 'src/menu/Menu';
 import Explorer from 'src/explorer/Explorer';
+import Uploader from 'src/uploader/Uploader';
 
 import Table from 'src/table/Table';
 import Statistics from 'src/statistics/Statistics';
 
-export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Table.name, Statistics.name ] )
+export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Uploader.name, Table.name, Statistics.name ] )
   .config(($routeProvider, $mdIconProvider, $mdThemingProvider) => {
 
     $mdIconProvider

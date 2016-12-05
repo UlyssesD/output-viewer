@@ -18,54 +18,7 @@ function AppController( MenuDataService, TableDataService, Upload, $mdSidenav) {
             'skip': 0
         }).then(function(data){ console.log('trallallero'); console.log(data)});
 */
-    self.upload = function (file) {
-        console.log(file);
-/*       
-        var reader = new FileReader();
-        reader.onload = function(event) {
-            var contents = event.target.result;
-            console.log("File contents: " + contents);
-            
-            
-        };
-        
-        reader.onerror = function(event) {
-        console.error("File could not be read! Code " + event.target.error.code);
-        };
-
-        reader.readAsText(file);
-*/
-
-        Upload.upload({
-                url: 'api/upload.php',
-                method: 'POST',
-                file: file,
-                headers: {'Content-Type': 'text'},
-                data: {'targetPath': 'file_queue/'}
-        }).then(function (resp) {
-            console.log('Success! Response: ' + resp.data );
-        }, function (resp) {
-            console.log('Error status: ' + resp.status);
-        }, function (evt) {
-            var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-            console.log('progress: ' + progressPercentage + '% ');
-        });
-
-/*
- Upload.upload({
-            url: 'upload.php',
-            method: 'GET',
-            headers: {
-                'Authorization': 'xxx'
-            },
-            data: {
-              target_path: '/upload/',
-              file: file
-            }
-        });
-
-*/
-    };
+    
 
     console.log(self.data);
 /*

@@ -1,10 +1,11 @@
 <section layout="row">
-        <md-list flex>
+        <md-list flex md-colors="{background: 'background-A100'}">
             <ng-repeat ng-repeat="el in $ctrl.data.elements track by $index">
                 <md-list-item href="#details/{{el.name}}" flex aria-label="{{el.name}}">
                     <p>{{el.name}}</p>
                     </div>
                 </md-list-item>
+                <md-divider></md-divider>
             </ng-repeat>
         </md-list>
     </md-card-content>

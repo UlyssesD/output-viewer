@@ -1,20 +1,21 @@
 class FileUploaderController {
 
-    constructor($http, $log) {
+    constructor($http, $log, Upload) {
         var self = this;
 
         self.$log = $log;
         self.$http = $http;
+        self.Upload = Upload;
 
         self.config = {};
         self.data = null;
 
+        self.uploadFile = function(file) {
 
-        self.upload = function (file) {
+            console.log("Hello lola");
             console.log(file);
 
-
-            Upload.upload({
+            self.Upload.upload({
                 url: 'api/upload.php',
                 method: 'POST',
                 file: file,

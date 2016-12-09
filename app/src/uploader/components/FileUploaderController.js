@@ -11,8 +11,7 @@ class FileUploaderController {
         self.data = null;
 
         self.uploadFile = function(file) {
-
-            console.log("Hello lola");
+            
             console.log(file);
 
             self.Upload.upload({

@@ -39,7 +39,7 @@
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Depth</h3>
-                    <p>{{$ctrl.selected.annotations.DP[0]}}</p>
+                    <p>{{$ctrl.selected.annotations.DP}}</p>
                   </div>
                 </md-list-item>
 
@@ -47,7 +47,7 @@
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Gene</h3>
                     <p>
-                      <ng-repeat ng-repeat="gene in $ctrl.selected.annotations['Gene.refGene']">{{gene}}{{$last ? '' : ', '}}</ng-repeat>
+                      <ng-repeat ng-repeat="gene in $ctrl.selected.annotations['Gene.refGene'] track by $index">{{gene}}{{$last ? '' : ', '}}</ng-repeat>
                     </p>
                   </div>
                 </md-list-item>
@@ -55,7 +55,7 @@
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Location</h3>
-                    <p>{{ $ctrl.selected.annotations['Func.refGene'][0]}}</p>
+                    <p>{{ $ctrl.selected.annotations['Func.refGene']}}</p>
                   </div>
                 </md-list-item>
               </md-list>
@@ -66,7 +66,7 @@
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">dbSNP</h3>
-                    <p>{{$ctrl.selected.annotations['snp138NonFlagged'][0] != "None" ? $ctrl.selected.annotations['snp138NonFlagged'][0]
+                    <p>{{$ctrl.selected.variant.dbSNP != "None" ? $ctrl.selected.variant.dbSNP
                       : '-' }}</p>
                   </div>
                 </md-list-item>
@@ -81,21 +81,21 @@
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">CQ Ratio</h3>
-                    <p>{{$ctrl.selected.annotations.QD[0]}}</p>
+                    <p>{{$ctrl.selected.annotations.QD}}</p>
                   </div>
                 </md-list-item>
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">FS</h3>
-                    <p>{{$ctrl.selected.annotations.FS[0]}}</p>
+                    <p>{{$ctrl.selected.annotations.FS}}</p>
                   </div>
                 </md-list-item>
 
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">MQ0</h3>
-                    <p>{{ $ctrl.selected.annotations.MQ0[0]}}</p>
+                    <p>{{ $ctrl.selected.annotations.MQ0}}</p>
                   </div>
                 </md-list-item>
               </md-list>

@@ -1,0 +1,4 @@
+{
+    "address": "localhost:7474",
+    "credentials": "neo4j:password"
+}

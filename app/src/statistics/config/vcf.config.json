@@ -11,7 +11,7 @@
             "values": [
                 "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.snp }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">snp</p></div> </md-list-item><md-divider inset></md-divider>",
                 "<md-list-item class='md-2-line'><div class='md-list-item-text'><h3>{{ $ctrl.data.indels }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">indels</p></div></md-list-item><md-divider inset></md-divider>",
-                "<md-list-item class='md-2-line' ng-if='$ctrl.data.unkwnown != 0'><div class='md-list-item-text'><h3>{{ $ctrl.data.unkwnown }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">unknowns</p></div></md-list-item>"
+                "<md-list-item class='md-2-line' ng-if='$ctrl.data.unknown != 0'><div class='md-list-item-text'><h3>{{ $ctrl.data.unknown }}</h3><p md-colors=\"{color: 'default-primary-hue-2-0.87'}\">unknowns</p></div></md-list-item>"
             ]
         },
         {

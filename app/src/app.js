@@ -2,6 +2,7 @@
 import angular from 'angular';
 
 
+import 'angular-messages';
 import 'angular-animate';
 import 'angular-aria';
 import 'angular-material';
@@ -22,7 +23,7 @@ import Uploader from 'src/uploader/Uploader';
 import Table from 'src/table/Table';
 import Statistics from 'src/statistics/Statistics';
 
-export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Uploader.name, Table.name, Statistics.name ] )
+export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMessages', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Uploader.name, Table.name, Statistics.name ] )
   .config(($routeProvider, $mdIconProvider, $mdThemingProvider) => {
 
     $mdIconProvider

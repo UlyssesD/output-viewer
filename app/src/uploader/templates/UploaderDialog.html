@@ -1,0 +1,66 @@
+<md-dialog md-colors="{background: 'default-grey-200'}" style="min-width:600px;width:auto;">
+    <md-toolbar layout="row" class="md-whiteframe-4dp">
+        <div class="md-toolbar-tools">
+            <h2 style="color: white">Upload new experiment</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="$ctrl.closeDialog()">
+                <md-icon md-font-set="material-icons" style="color: white"> clear </md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <md-dialog-content layout="column" style="position:relative;width:800px;max-height:810px;" layout-padding>
+
+        <p>To upload a new experiment, please provide a name for the experiment and select all file(s) pertaining it. When finished,
+            select "Upload" to complete the procedure.</p>
+        <form name="uploadForm" md-colors="{background: 'default-grey-200'}">
+            <section layout="row" flex>
+
+                <span flex="5"></span>
+
+                <md-input-container class="md-block" flex="40">
+                    <input name="name" type="text" md-maxlength="35" maxlength="35" ng-model="$ctrl.experiment.name" placeholder="Experiment name"
+                        required>
+
+                    <div ng-messages="uploadForm.name.$error">
+                        <div ng-message="required">This field is required.</div>
+                        <div ng-message="md-maxlength">Experiment name is too long.</div>
+                    </div>
+                </md-input-container>
+
+                <span flex="10"></span>
+
+                <md-input-container flex="40">
+                    <label>Input file(s) format</label>
+                    <md-select name="type" ng-model="$ctrl.experiment.type" required>
+                        <md-option value="vcf">Variant Call Format (.vcf)</md-option>
+                    </md-select>
+
+                    <div ng-messages="uploadForm.type.$error">
+                        <div ng-message="required">This field is required.</div>
+                    </div>
+                </md-input-container>
+
+                <span flex="5"></span>
+
+            </section>
+
+            <section layout="row" flex>
+                 <span flex="5"></span>
+
+                <md-autocomplete md-input-name="speciesField" required md-no-cache md-selected-item="$ctrl.experiment.species" md-search-text="$ctrl.species.searchTerm"
+                    md-items="item in $ctrl.querySearch($ctrl.species.searchTerm)" md-item-text="item.display" md-min-length="0"
+                    md-floating-label="Species" flex="40">
+                    <md-item-template>
+                        <span md-highlight-text="$ctrl.species.searchTerm" md-highlight-flags="^i">{{item.display}}</span>
+                    </md-item-template>
+                    <div ng-messages="uploadForm.speciesField.$error" ng-if="uploadForm.speciesField.$touched">
+                        <div ng-message="required">You <b>must</b> indicate a species for the selected file(s).</div>
+                    </div>
+                </md-autocomplete>
+
+                <span flex="55"></span>
+            </section>
+        </form>
+    </md-dialog-content>
+</md-dialog>

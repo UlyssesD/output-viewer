@@ -7,6 +7,6 @@
   move_uploaded_file( $_FILES['file']['tmp_name'] , $destination );
 
   // Giusto una prova
-  exec('python prova.py ' . $destination, $out);
+  //exec('python prova.py ' . $destination, $out);
 ?>
 

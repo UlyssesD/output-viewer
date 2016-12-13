@@ -25,6 +25,7 @@ class FileUploaderController {
                 }
             ]
         }
+
         self.experiment = {
             name: "",
             type: "",
@@ -51,28 +52,34 @@ class FileUploaderController {
                     console.log("Dialog closed.");
                 })
 
+        };
+
+        self.removeFromList = function (file_index) {
+            self.experiment.files.splice(file_index, 1)
         }
 
-        self.uploadFile = function (file) {
+        self.uploadFiles = function () {
+            console.log("Beginning of upload procedure...");
+            console.log(self.experiment.files)
 
-            console.log(file);
+            angular.forEach(self.experiment.files, function (file) {
 
-            self.Upload.upload({
-                url: 'api/upload.php',
-                method: 'POST',
-                file: file,
-                headers: { 'Content-Type': 'text' },
-                data: { 'targetPath': 'file_queue/' }
-            }).then(function (resp) {
-                console.log('Success! Response: ' + resp.data);
-            }, function (resp) {
-                console.log('Error status: ' + resp.status);
-            }, function (evt) {
-                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                console.log('progress: ' + progressPercentage + '% ');
+                self.Upload.upload({
+                    url: 'api/upload.php',
+                    method: 'POST',
+                    file: file,
+                    headers: { 'Content-Type': 'text' },
+                    data: { 'targetPath': 'file_queue/' }
+                }).then(function (resp) {
+                    console.log('Success! Response: ' + resp.data);
+                }, function (resp) {
+                    console.log('Error status: ' + resp.status);
+                }, function (evt) {
+                    file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    console.log(file.name + " progress: " + file.progress + "%;");
+                });
+
             });
-
-
         };
 
         self.querySearch = function (query) {
@@ -91,6 +98,13 @@ class FileUploaderController {
 
         }
         self.closeDialog = function () {
+            self.experiment = {
+                name: "",
+                type: "",
+                species: "",
+                files: []
+            }
+
             $mdDialog.hide();
         };
     }

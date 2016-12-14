@@ -14,7 +14,7 @@ class TableDataService {
         // --- Metodi pubblici della classe ---
 
         // Interrogo il database per ottenere le varianti secondo la query passata in input
-        self.loadVariantsFromQuery = function (query) {
+        self.loadVariantsFromQuery = function(query) {
             console.log('Retrieving data for selected query...');
 
             return $http({
@@ -29,11 +29,20 @@ class TableDataService {
                 data: {
                     "statements": [
                         {
-                            "statement": "match(v: Variant),(f: File) where exists((f)-[:Contains]->(v)) and f.name = {filename} with count(v) as total match(f: File)-[:Contains]->(v: Variant) where f.name = {filename} with total, v as variant order by ID(v) skip {skip} limit {limit} match (g: Genotype) where exists((variant)-[:Sample]->(g: Genotype)) with total, variant, collect(g) as genotype_list, count(g) as genotypes match (variant)-[:Annotation]->(i: Info) return {total: total, variant: variant, genotypes: genotype_list, annotations: i}",
+                            "statement": [
+                                "MATCH (u:User {username: {username}})-[:Created]->(e:Experiment)-[:Composed_By]->(f:File {name:{filename}}) WITH f",
+                                "MATCH (f)-[:Contains]->(i:Info) WITH f, count(i) as total",
+                                "MATCH (f)-[:Contains]->(i:Info) WITH  total, i ORDER BY i.info_id SKIP {skip} LIMIT {limit}",
+                                "MATCH (i)-[fv:For_Variant]->(v:Variant) WITH  total, i, v, fv",
+                                "MATCH (i)-[sb:Supported_By]->(g:Genotype) WITH total, i, v, fv, collect({sample: g, attr: sb}) as genotypes",
+                                "RETURN {total: total, variant: {common: v, attr: fv}, annotations: i, genotypes: genotypes }"
+                            ].join(" "),
                             "parameters": {
+                                "username": query.username,
+                                "experiment": "MyExp",
+                                "filename": query.file,
                                 "skip": query.skip,
-                                "limit": query.limit,
-                                "filename": query.file
+                                "limit": query.limit
                             }
                         }
 
@@ -43,9 +52,10 @@ class TableDataService {
         };
 
         // Metodo chiamato una volta ottenute le varianti dal database. Riorganizzo i dati prima di passarli alla vista
-        self.variantRetrieved = function (response) {
+        self.variantRetrieved = function(response) {
             console.log('Data successfully retrieved');
-            
+            console.log(response);
+
             var data = {
                 count: 0,
                 elements: []

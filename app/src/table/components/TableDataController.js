@@ -14,6 +14,7 @@ class TableDataController {
         self.rows = [];
 
         self.query = {
+            'username': 'lola',
             'file': $routeParams.filename,
             'limit': 5,
             'page': 1,
@@ -82,7 +83,7 @@ class TableDataController {
         self.showAnnotations = function ($event, selected) {
 
             self.selected = selected;
-            self.genotype_headers = selected.variant.FORMAT.split(':');
+            self.genotype_headers = selected.variant.attr.FORMAT.split(':');
             self.genotypes_page = 1;
             self.displayed_samples = self.selected.genotypes.slice(5 * (self.genotypes_page - 1), Math.min(self.selected.genotypes.length, 5 * (self.genotypes_page - 1) + 5));
 

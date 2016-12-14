@@ -21,7 +21,7 @@
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Position</h3>
-                    <p>{{$ctrl.selected.variant.CHROM}}:{{$ctrl.selected.variant.POS}}-{{$ctrl.selected.variant.END}}</p>
+                    <p>{{$ctrl.selected.variant.common.CHROM}}:{{$ctrl.selected.variant.common.POS}}-{{$ctrl.selected.variant.attr.END}}</p>
                   </div>
                 </md-list-item>
 
@@ -29,9 +29,9 @@
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Allele variation</h3>
                     <p>
-                      {{$ctrl.selected.variant.REF}}
+                      {{$ctrl.selected.variant.common.REF}}
                       <md-icon md-font-set="material-icons"> trending_flat </md-icon>
-                      {{$ctrl.selected.variant.ALT}}
+                      {{$ctrl.selected.variant.common.ALT}}
                     </p>
                   </div>
                 </md-list-item>
@@ -66,7 +66,7 @@
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">dbSNP</h3>
-                    <p>{{$ctrl.selected.variant.dbSNP != "None" ? $ctrl.selected.variant.dbSNP
+                    <p>{{$ctrl.selected.variant.attr.dbSNP != "None" ? $ctrl.selected.variant.attr.dbSNP
                       : '-' }}</p>
                   </div>
                 </md-list-item>
@@ -74,7 +74,7 @@
                 <md-list-item class="md-2-line">
                   <div class="md-list-item-text">
                     <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">Quality</h3>
-                    <p>{{$ctrl.selected.variant.QUAL}}</p>
+                    <p>{{$ctrl.selected.variant.attr.QUAL}}</p>
                   </div>
                 </md-list-item>
 
@@ -146,12 +146,12 @@
                 </tr>
               </thead>
               <tbody md-body>
-                <tr md-row ng-repeat="sample in $ctrl.displayed_samples track by $index" ng-switch on="sample.state">
+                <tr md-row ng-repeat="genotype in $ctrl.displayed_samples track by $index" ng-switch on="genotype.attr.state">
                   <td md-cell>
-                    <p>{{sample.sample}}</p>
+                    <p>{{genotype.sample.sample}}</p>
                   </td>
                   <td md-cell>
-                    <p>{{sample.phased}}</p>
+                    <p>{{genotype.attr.phased}}</p>
                   </td>
                   <td md-cell ng-switch-when='0'>
                     <p>hom_ref</p>
@@ -166,7 +166,7 @@
                     <p>uncalled</p>
                   </td>
                   <td md-cell ng-repeat="idx in $ctrl.genotype_headers">
-                    <p>{{sample[idx]}}</p>
+                    <p>{{genotype.attr[idx]}}</p>
                   </td>
                 </tr>
               </tbody>

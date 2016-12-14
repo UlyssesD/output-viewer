@@ -30,7 +30,8 @@ class FileUploaderController {
             name: "",
             type: "",
             species: "",
-            files: []
+            files: [],
+            deletionEnabled: false
         }
 
         self.openUploadForm = function ($event) {
@@ -54,8 +55,37 @@ class FileUploaderController {
 
         };
 
+        self.selectAll = function () {
+             angular.forEach(self.experiment.files, function (file) {
+                 file.selected = true;
+             });
+
+             self.experiment.deletionEnabled = true;
+        }
+
+        self.enableDeletion = function () {
+            var isEnabled = false
+            for (var i=0; i < self.experiment.files.length; i++)
+                if (self.experiment.files[i].selected) {
+                    isEnabled = true;
+                    break;
+                }
+            
+           self.experiment.deletionEnabled = isEnabled;
+        }
+
         self.removeFromList = function (file_index) {
-            self.experiment.files.splice(file_index, 1)
+            var remove = [];
+
+            for (var i=0; i < self.experiment.files.length; i++) {
+                if (self.experiment.files[i].selected)
+                    remove.push(i);
+            }
+
+            while (remove.length != 0)
+                self.experiment.files.splice(remove.pop(), 1);
+            
+            self.experiment.deletionEnabled = false;
         }
 
         self.uploadFiles = function () {
@@ -69,8 +99,15 @@ class FileUploaderController {
                     method: 'POST',
                     file: file,
                     headers: { 'Content-Type': 'text' },
-                    data: { 'targetPath': 'file_queue/' }
+                    data: { 
+                        'targetPath': 'file_queue/',
+                        'username': 'lola',
+                        'experiment': self.experiment.name, 
+                        'type': self.experiment.type,
+                        'species': self.experiment.species.value
+                    }
                 }).then(function (resp) {
+                    file.progress = 101;
                     console.log('Success! Response: ' + resp.data);
                 }, function (resp) {
                     console.log('Error status: ' + resp.status);

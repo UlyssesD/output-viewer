@@ -1,5 +1,5 @@
 <md-dialog md-colors="{background: 'default-grey-200'}" style="min-width:600px;width:auto;">
-    <md-toolbar layout="row" class="md-whiteframe-4dp">
+    <md-toolbar layout="row" class="md-whiteframe-8dp" md-colors="{background: 'primary', color: 'background-A100'}">
         <div class="md-toolbar-tools">
             <h2 style="color: white">Upload new experiment</h2>
             <span flex></span>
@@ -8,102 +8,87 @@
             </md-button>
         </div>
     </md-toolbar>
-    <form name="uploadForm" md-colors="{background: 'default-grey-200'}">
-        <md-dialog-content layout="column" style="position:relative;width:800px;max-height:810px;" layout-padding>
+    <form name="uploadForm">
+        <md-dialog-content layout="row" style="position:relative;width:900px;max-height:810px;">
+            <div layout="column" flex="30">
+                <div layout-padding md-whiteframe="4">
+                    <p layout="row" flex>
+                        To upload a new experiment, please provide a name for the experiment and select all file(s) pertaining it. When finished,
+                        select "Upload" to complete the procedure.
+                    </p>
 
-            <p>To upload a new experiment, please provide a name for the experiment and select all file(s) pertaining it. When
-                finished, select "Upload" to complete the procedure.</p>
+                    <md-input-container class="md-block" layout="row" flex>
+                        <input name="name" type="text" md-maxlength="35" maxlength="35" ng-model="$ctrl.experiment.name" placeholder="Experiment name"
+                            required>
+                        <div ng-messages="uploadForm.name.$error">
+                            <div ng-message="required">This field is required.</div>
+                            <div ng-message="md-maxlength">Experiment name is too long.</div>
+                        </div>
+                    </md-input-container>
 
-            <section layout="row" flex>
+                    <md-input-container class="md-block" layout="row" flex>
+                        <label>Input file(s) format</label>
+                        <md-select name="type" ng-model="$ctrl.experiment.type" required>
+                            <md-option value="vcf">Variant Call Format (.vcf)</md-option>
+                        </md-select>
+                        <div ng-messages="uploadForm.type.$error">
+                            <div ng-message="required">This field is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-autocomplete md-input-name="speciesField" required md-no-cache md-selected-item="$ctrl.experiment.species"
+                        md-search-text="$ctrl.species.searchTerm" md-items="item in $ctrl.querySearch($ctrl.species.searchTerm)"
+                        md-item-text="item.display" md-min-length="0" md-floating-label="Species" layout="row" flex>
+                        <md-item-template>
+                            <span md-highlight-text="$ctrl.species.searchTerm" md-highlight-flags="^i">{{item.display}}</span>
+                        </md-item-template>
+                        <div ng-messages="uploadForm.speciesField.$error" ng-if="uploadForm.speciesField.$touched">
+                            <div ng-message="required">You <b>must</b> indicate a species for the selected file(s).</div>
+                        </div>
+                    </md-autocomplete>
+                </div>
+            </div>
 
-                <span flex="5"></span>
+            <md-divider></md-divider>
 
-                <md-input-container class="md-block" flex="40">
-                    <input name="name" type="text" md-maxlength="35" maxlength="35" ng-model="$ctrl.experiment.name" placeholder="Experiment name"
-                        required>
+            <div layout="column" flex="70">
 
-                    <div ng-messages="uploadForm.name.$error">
-                        <div ng-message="required">This field is required.</div>
-                        <div ng-message="md-maxlength">Experiment name is too long.</div>
-                    </div>
-                </md-input-container>
-
-                <span flex="10"></span>
-
-                <md-input-container flex="40">
-                    <label>Input file(s) format</label>
-                    <md-select name="type" ng-model="$ctrl.experiment.type" required>
-                        <md-option value="vcf">Variant Call Format (.vcf)</md-option>
-                    </md-select>
-
-                    <div ng-messages="uploadForm.type.$error">
-                        <div ng-message="required">This field is required.</div>
-                    </div>
-                </md-input-container>
-
-                <span flex="5"></span>
-
-            </section>
-
-            <section layout="row" flex>
-                <span flex="5"></span>
-
-                <md-autocomplete md-input-name="speciesField" required md-no-cache md-selected-item="$ctrl.experiment.species" md-search-text="$ctrl.species.searchTerm"
-                    md-items="item in $ctrl.querySearch($ctrl.species.searchTerm)" md-item-text="item.display" md-min-length="0"
-                    md-floating-label="Species" flex="40">
-                    <md-item-template>
-                        <span md-highlight-text="$ctrl.species.searchTerm" md-highlight-flags="^i">{{item.display}}</span>
-                    </md-item-template>
-                    <div ng-messages="uploadForm.speciesField.$error" ng-if="uploadForm.speciesField.$touched">
-                        <div ng-message="required">You <b>must</b> indicate a species for the selected file(s).</div>
-                    </div>
-                </md-autocomplete>
-
-                <span flex="55"></span>
-            </section>
+                <md-toolbar layout="row" class="md-toolbar-tools md-primary md-hue-2 md-whiteframe-4dp">
+                    <p>Files of the experiment:</p>
+                    <span flex></span>
+                    <input class="ng-hide" id="input-file-id" name="files" ngf-select ng-model="$ctrl.experiment.files" required ngf-multiple="true"
+                        ngf-keep="'distinct'" type="file" />
+                    <md-button class="md-warn md-raised" aria-label="remove" ng-click="$ctrl.removeFromList()" ng-disabled="!$ctrl.experiment.deletionEnabled"> Remove </md-button>
+                    <md-button class="md-accent md-raised" aria-label="remove" ng-click="$ctrl.selectAll()" ng-disabled="$ctrl.experiment.files.length == 0"> Select all </md-button>
+                    <label for="input-file-id" class="md-button md-raised md-accent" md-ink-ripple="default-accent">Add files</label>
+                </md-toolbar>
 
 
-            <section layout="row" flex>
-                <span flex="5"></span>
-                <span flex="40">
-                    <label>Files of the experiment:</label>
-                    <input class="ng-hide" id="input-file-id" name="files" ngf-select ng-model="$ctrl.experiment.files" required ngf-multiple="true" ngf-keep="'distinct'" type="file" />
-                    <label for="input-file-id" class="md-button md-raised md-primary" md-ink-ripple="default-primary-hue-1">Select</label>
-                </span>
-                <span flex="55"></span>
-            </section>
-            
-            
-            <section layout="row" flex>
-                <span flex="5"></span>
-                <span flex="90">
-                        <md-list ng-if="$ctrl.experiment.files.length != 0">
-                          <md-list-item ng-repeat="file in $ctrl.experiment.files track by $index" layout-margin class="md-whiteframe-2dp">
-                             <md-button class="md-icon-button" ng-click="$ctrl.removeFromList($index)" ng-hide="file.progress > 0">
-                                <md-icon md-font-set="material-icons"> clear </md-icon>
-                             </md-button>
-                            
+                <md-content md-colors="{background: 'default-grey-200'}" flex>
+                    <md-list ng-if="$ctrl.experiment.files.length != 0" flex layout-margin>
+                        <md-list-item ng-repeat="file in $ctrl.experiment.files track by $index" class="md-whiteframe-2dp" md-colors="{background: 'default-grey-50'}">
+                            <md-checkbox ng-model="file.selected" ng-change="$ctrl.enableDeletion()"></md-checkbox>
                             <div flex="40">
                                 <p class="md-caption">{{ file.name | limitTo: 35 }}{{ file.name.length > 35 ? '...' : '' }}</p>
                                 <md-tooltip md-direction="top" ng-if="file.name.length > 35">{{file.name}}</md-tooltip>
                             </div>
 
-                            <div flex=50 ng-switch="file.progress">
+                            <div flex="40" ng-switch="file.progress" layout-align="center center">
 
-                            <div ng-switch-when="undefined"></div>
-                            <md-progress-linear md-mode="indeterminate" ng-switch-when="100"></md-progress-linear>
-                            <md-progress-linear md-mode="determinate" value="{{file.progress}}" ng-switch-default></md-progress-linear>
-                          </md-list-item>
-                        </md-list>
+                                <div ng-switch-when="undefined"></div>
+                                <md-progress-linear md-mode="indeterminate" ng-switch-when="100"></md-progress-linear>
+                                <p ng-switch-when="101" md-colors="{color: 'default-primary-hue-2'}">Completed!</p>
+                                <md-progress-linear md-mode="determinate" value="{{file.progress}}" ng-switch-default></md-progress-linear>
 
+                            </div>
+                        </md-list-item>
+                    </md-list>
+                </md-content>
 
-                </span>
-                <span flex="5"></span>
-            </section>
+            </div>
 
         </md-dialog-content>
 
-        <md-dialog-actions md-colors="{background: 'default-accent'}">
+        <md-dialog-actions md-colors="{background: 'default-accent'}" md-whiteframe="8">
             <md-button ng-disabled="(!uploadForm.$valid) || $ctrl.experiment.files.length == 0" ng-click="$ctrl.uploadFiles()">Submit</button>
         </md-dialog-actions>
     </form>

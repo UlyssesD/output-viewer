@@ -29,8 +29,10 @@ class FileStatisticsService {
                 data: {
                     "statements": [
                         {
-                            "statement": "match(f: File { name: {filename} }) return f as statistics",
+                            "statement": "MATCH (u:User {username: {username}})-[:Created]->(e:Experiment)-[:Composed_By]->(f:File { name:{filename} }) RETURN f as statistics",
                             "parameters": {
+                                "username": "lola",
+                                "experiment": "MyExp",
                                 "filename": query.file
                             }
                         }

@@ -14,7 +14,7 @@ class FileExplorerController {
 
         FileExplorerService.loadData(self.query).then(function(data){
             self.processDataForVisualization(data);
-        }).catch(function () { console.log('Some error occurred') });;
+        }).catch(function (err) { console.log('Some error occurred',  err) });;
 
 
         self.processDataForVisualization = function(data) {

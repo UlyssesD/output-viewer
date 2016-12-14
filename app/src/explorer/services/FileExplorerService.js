@@ -29,9 +29,10 @@ class FileExplorerService {
                 data: {
                     "statements": [
                         {
-                            "statement": "match (u: User { username: {username} }),(f: File) where (u)-[:Owns]->(f) return { name: f.name }",
+                            "statement": "MATCH (u:User { username:{username} })-[:Created]->(e:Experiment)-[:Composed_By]->(f:File) RETURN {name: f.name}",
                             "parameters": {
-                                "username": query.username
+                                "username": query.username,
+                                "experiment": "MyExp"
                             }
                         }
                     ]
@@ -41,6 +42,7 @@ class FileExplorerService {
 
         // Metodo chiamato una volta ottenute le statistiche sul file dal database. Riorganizzo i dati prima di passarli alla vista
         self.dataRetrieved = function(response) {
+            console.log(response);
             console.log('File list successfully retrieved');
 
              var data = {

@@ -1,3 +1,5 @@
+import config from "src/table/config/vcf.config.json!json";
+
 class TableDataController {
 
     /** Costruttore
@@ -24,22 +26,7 @@ class TableDataController {
 
         console.log($routeParams);
 
-        // Caricamento del file di config
-        $http.get('src/table/config/vcf.config.json')
-            .then(
-
-            function (response) {
-                console.log("Loaded tableData configuration file");
-                self.config = response.data;
-
-                console.log(self.config);
-            },
-
-            function (error) {
-                console.log("Some error occurred");
-            }
-
-            );
+        self.config = config;
 
 
         self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {

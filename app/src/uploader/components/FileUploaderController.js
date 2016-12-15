@@ -43,15 +43,13 @@ class FileUploaderController {
                 parent: angular.element(document.body),
                 targetEvent: $event,
                 templateUrl: './src/uploader/templates/UploaderDialog.html',
-                clickOutsideToClose: true,
+                clickOutsideToClose: false,
                 controller: () => self,
                 controllerAs: '$ctrl'
             }
 
             self.$mdDialog.show(uploadDialog)
-                .finally(function () {
-                    console.log("Dialog closed.");
-                })
+                .finally(self.closeDialog);
 
         };
 
@@ -108,12 +106,12 @@ class FileUploaderController {
                     }
                 }).then(function (resp) {
                     file.progress = 101;
-                    console.log('Success! Response: ' + resp.data);
+                    console.log("Success! ", resp);
                 }, function (resp) {
-                    console.log('Error status: ' + resp.status);
+                    console.log('Error status: ', resp);
                 }, function (evt) {
                     file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
-                    console.log(file.name + " progress: " + file.progress + "%;");
+                    //console.log(file.name + " progress: " + file.progress + "%;");
                 });
 
             });

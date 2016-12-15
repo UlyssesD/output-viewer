@@ -1,0 +1,11 @@
+{
+    "neo4j": {
+        "address": "localhost",
+        "port": 7474,
+        "username": "neo4j",
+        "password": "password"
+    },
+    "website": {
+        "address": "localhost/output-viewer/"
+    }
+}

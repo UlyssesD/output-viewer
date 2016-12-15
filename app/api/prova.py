@@ -18,27 +18,24 @@ def main(argv):
     experiment = argv[2]
     species = argv[3]
 
-    temp_token = str(uuid.uuid4())
+    config = json.load(open('../configuration.json'))
+    
+    temp_token = username + '_' + str(uuid.uuid4()) 
 
     # File csv per i nodi del grafo
-    # experiment_csv = open('experiment.csv', 'w')
-    # species_csv = open('species.csv', 'w')
-    file_csv = open(username + '_' + temp_token + '_file.csv', 'w')
-    variant_csv = open(username + '_' + temp_token + '_variant.csv', 'w')
-    info_csv = open(username + '_' + temp_token + '_info.csv','w')
-    genotype_csv = open(username + '_' + temp_token + '_genotype.csv','w')
+    
+    variant_csv = open('temp/' + temp_token + '_variant.csv', 'w')
+    info_csv = open('temp/' + temp_token + '_info.csv','w')
+    genotype_csv = open('temp/' + temp_token + '_genotype.csv','w')
     
     # File csv per le relazioni del grafo
-    #created_csv = open('created.csv', 'w')
-    #composed_by_csv = open('composed_by.csv', 'w')
-    #for_species_csv = open('for_species.csv', 'w')
-    of_species_csv = open(username + '_' + temp_token + '_of_species.csv', 'w')
-    contains_csv = open(username + '_' + temp_token + '_contains.csv', 'w')
-    supported_by_csv = open(username + '_' + temp_token + '_supported_by.csv', 'w')
-    for_variant_csv = open(username + '_' + temp_token + '_for_variant.csv', 'w')
+    of_species_csv = open('temp/' + temp_token + '_of_species.csv', 'w')
+    contains_csv = open('temp/' + temp_token + '_contains.csv', 'w')
+    supported_by_csv = open('temp/' + temp_token + '_supported_by.csv', 'w')
+    for_variant_csv = open('temp/' + temp_token + '_for_variant.csv', 'w')
 
     # Inizializzo i writer per tutti i file
-    fileWriter = csv.writer(file_csv)
+    
     variantWriter = csv.writer(variant_csv, delimiter=',')
     infoWriter = csv.writer(info_csv, delimiter=',')
     genotypeWriter = csv.writer(genotype_csv, delimiter=',')
@@ -57,7 +54,6 @@ def main(argv):
 
 
     # Costruisco gli header dei nodi
-    file_header = ["name", "total", "hom", "het", "hom_alt", "uncalled", "snp", "indels", "unknown", "in_dbSNP", "not_in_dbSNP", "in_1000g", "not_in_1000g"]
     variant_header = ["variant_id", "CHROM", "POS", "REF", "ALT"]
     genotype_header = ["sample"]
 
@@ -88,7 +84,6 @@ def main(argv):
     info_header = list(info_header) + ["info_id"]
 
     # Scrivo gli header dei nodi nei rispettivi file
-    fileWriter.writerow(file_header)
     variantWriter.writerow(variant_header)
     genotypeWriter.writerow(genotype_header)
     infoWriter.writerow(info_header)
@@ -240,20 +235,13 @@ def main(argv):
         forVariantWriter.writerow(for_variant_row)
 
 
-    file_row = []
-
-    for item in file_header:
-        file_row.append(properties[item])
-
-    fileWriter.writerow(file_row)
-
     for item in list(genotypes):
         genotypeWriter.writerow( [ item ] )
         ofSpeciesWriter.writerow( [ item, species ] )
 
-    
+    file.close()
+
     # Termino la scrittura dei file (altrimenti non posso caricare i dati su database)
-    file_csv.close()
     variant_csv.close()
     info_csv.close()
     genotype_csv.close()
@@ -262,12 +250,12 @@ def main(argv):
     contains_csv.close()
     supported_by_csv.close()
     for_variant_csv.close()
-
+    
      # Versione che salva le righe del file in Neo4j
     print 'Populating Database...'
 
     # Connessione a Neo4j
-    driver = GraphDatabase.driver("bolt://localhost", auth=basic_auth("neo4j", "password"));
+    driver = GraphDatabase.driver("bolt://" + config["neo4j"]["address"], auth=basic_auth(config["neo4j"]["username"], config["neo4j"]["password"]));
     session = driver.session()
 
     statements = [
@@ -285,7 +273,7 @@ def main(argv):
        "MERGE (u:User { username:{username} })",
        "MERGE (e:Experiment { name:{experiment} })",
        "MERGE (s:Species {species: {species} })",
-       "MERGE (f:File) SET f += {properties}",
+       "MERGE (f:File { name:{properties}.name }) ON CREATE SET f += {properties}",
        "MERGE (u)-[:Created]->(e)",
        "MERGE (e)-[:For_Species]->(s)",
        "MERGE (e)-[:Composed_By]->(f)"
@@ -303,44 +291,44 @@ def main(argv):
     queries = [
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://localhost/output-viewer/app/api/" + username + "_" + temp_token + "_variant.csv' as line",
+            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_variant.csv' as line",
             "MERGE (v:Variant {variant_id: line.variant_id})",
             "ON CREATE SET v += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://localhost/output-viewer/app/api/" + username + "_" + temp_token + "_info.csv' as line",
+            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_info.csv' as line",
             "CREATE (i:Info) SET i += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://localhost/output-viewer/app/api/" + username + "_" + temp_token + "_genotype.csv' as line",
+            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_genotype.csv' as line",
             "MERGE (g:Genotype {sample: line.sample})"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://localhost/output-viewer/app/api/" + username + "_" + temp_token + "_contains.csv' as line",
+            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_contains.csv' as line",
             "MATCH (f:File) WHERE f.name = line.name WITH line, f",
             "MATCH(i:Info) WHERE i.info_id = line.info_id",
             "CREATE (f)-[:Contains]->(i)"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://localhost/output-viewer/app/api/" + username + "_" + temp_token + "_for_variant.csv' as line",
+            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_for_variant.csv' as line",
             "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
             "MATCH(i:Info) WHERE i.info_id = line.info_id",
             "CREATE (i)-[f:For_Variant]->(v) SET f += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://localhost/output-viewer/app/api/" + username +  "_" + temp_token + "_supported_by.csv' as line",
+            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_supported_by.csv' as line",
             "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
             "MATCH(g:Genotype) WHERE g.sample= line.sample",
             "CREATE (i)-[s:Supported_By]->(g) SET s += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://localhost/output-viewer/app/api/" + username +  "_" + temp_token + "_of_species.csv' as line",
+            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_of_species.csv' as line",
             "MATCH(s:Species) WHERE s.species = line.species WITH line, s",
             "MATCH(g:Genotype) WHERE g.sample= line.sample",
             "CREATE (g)-[:Of_Species]->(s)"
@@ -358,14 +346,14 @@ def main(argv):
     session.close()
     print 'Done.'
 
-    os.remove(username + '_' + temp_token + '_file.csv', 'w')
-    os.remove(username + '_' + temp_token + '_variant.csv', 'w')
-    os.remove(username + '_' + temp_token + '_info.csv','w')
-    os.remove(username + '_' + temp_token + '_genotype.csv','w')
-    os.remove(username + '_' + temp_token + '_of_species.csv', 'w')
-    os.remove(username + '_' + temp_token + '_contains.csv', 'w')
-    os.remove(username + '_' + temp_token + '_supported_by.csv', 'w')
-    os.remove(username + '_' + temp_token + '_for_variant.csv', 'w')
+    os.remove(input_file)
+    os.remove('./temp/'  + temp_token + '_variant.csv')
+    os.remove('./temp/'  + temp_token + '_info.csv')
+    os.remove('./temp/'  + temp_token + '_genotype.csv')
+    os.remove('./temp/'  + temp_token + '_of_species.csv')
+    os.remove('./temp/'  + temp_token + '_contains.csv')
+    os.remove('./temp/'  + temp_token + '_supported_by.csv')
+    os.remove('./temp/'  + temp_token + '_for_variant.csv')
 
 
 if __name__ == "__main__":

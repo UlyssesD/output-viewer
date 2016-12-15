@@ -85,7 +85,8 @@ $RECYCLE.BIN/
 
 # Data files
 app/api/file_queue/*
-app/api/*.csv
+app/api/temp/*.csv
 
 # Commit also the folder
 !app/api/file_queue/.gitkeep
+!app/api/temp/.gitkeep

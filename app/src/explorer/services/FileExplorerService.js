@@ -1,3 +1,5 @@
+import config from "configuration.json!json";
+
 class FileExplorerService {
 
     constructor($q, $http, $log) {
@@ -9,7 +11,7 @@ class FileExplorerService {
         self.$log = $log;
 
         // Attributi della classe SPECIFICI
-        self.credentials = btoa('neo4j:password');
+        self.credentials = btoa(config.neo4j.username + ':' + config.neo4j.password);
 
         // --- Metodi pubblici della classe ---
         
@@ -19,7 +21,7 @@ class FileExplorerService {
 
             return $http({
                 method: 'POST',
-                url: 'http://localhost:7474/db/data/transaction/commit',
+                url: 'http://' + config.neo4j.address + ':' + config.neo4j.port + '/db/data/transaction/commit',
                 headers: {
                     'Authorization': 'Basic ' + self.credentials,
                     'Content-Type': 'Application/json',

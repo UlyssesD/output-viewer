@@ -1,3 +1,5 @@
+import menuItems from "src/menu/config/output_viewer.config.json!json";
+
 class MenuListController {
 
     /** Costruttore
@@ -11,23 +13,7 @@ class MenuListController {
         self.menuItems = {};
         self.selected = null;
 
-        $http.get('src/menu/config/output_viewer.config.json')
-            .then(
-
-            function (response) {
-                console.log("Loaded menuList configuration file");
-                self.menuItems = response.data;
-
-                console.log(self.menuItems);
-
-            },
-
-            function (error) {
-                console.log("Some error occurred");
-            }
-
-            );
-
+        self.menuItems = menuItems;
 
         self.selectItem = function (item) {
             self.selected = item.name;

@@ -1,5 +1,5 @@
 <md-dialog md-colors="{background: 'default-grey-200'}" style="min-width:600px;width:auto;">
-    <md-toolbar layout="row" class="md-whiteframe-8dp" md-colors="{background: 'primary', color: 'background-A100'}">
+    <md-toolbar layout="row" class="md-whiteframe-8dp" md-colors="{background: 'default-primary', color: 'background-A100'}">
         <div class="md-toolbar-tools">
             <h2 style="color: white">Upload new experiment</h2>
             <span flex></span>
@@ -11,7 +11,7 @@
     <form name="uploadForm">
         <md-dialog-content layout="row" style="position:relative;width:900px;max-height:810px;">
             <div layout="column" flex="30">
-                <div layout-padding md-whiteframe="4">
+                <div layout-padding flex>
                     <p layout="row" flex>
                         To upload a new experiment, please provide a name for the experiment and select all file(s) pertaining it. When finished,
                         select "Upload" to complete the procedure.
@@ -45,6 +45,12 @@
                             <div ng-message="required">You <b>must</b> indicate a species for the selected file(s).</div>
                         </div>
                     </md-autocomplete>
+
+                    <div layout="row" layout-align="center center">
+
+                        <md-button class="md-raised md-primary" ng-disabled="(!uploadForm.$valid) || $ctrl.experiment.files.length == 0" ng-click="$ctrl.uploadFiles()">Submit</button>
+
+                    </div>
                 </div>
             </div>
 
@@ -52,8 +58,8 @@
 
             <div layout="column" flex="70">
 
-                <md-toolbar layout="row" class="md-toolbar-tools md-primary md-hue-2 md-whiteframe-4dp">
-                    <p>Files of the experiment:</p>
+                <md-toolbar layout="row" class="md-toolbar-tools md-primary md-hue-2">
+                    <p>File(s) of the experiment:</p>
                     <span flex></span>
                     <input class="ng-hide" id="input-file-id" name="files" ngf-select ng-model="$ctrl.experiment.files" required ngf-multiple="true"
                         ngf-keep="'distinct'" type="file" />
@@ -66,17 +72,17 @@
                 <md-content md-colors="{background: 'default-grey-200'}" flex>
                     <md-list ng-if="$ctrl.experiment.files.length != 0" flex layout-margin>
                         <md-list-item ng-repeat="file in $ctrl.experiment.files track by $index" class="md-whiteframe-2dp" md-colors="{background: 'default-grey-50'}">
-                            <md-checkbox ng-model="file.selected" ng-change="$ctrl.enableDeletion()"></md-checkbox>
+                            <md-checkbox ng-model="file.selected" ng-change="$ctrl.enableDeletion()" ng-hide="file.progress >= 0"></md-checkbox>
                             <div flex="40">
                                 <p class="md-caption">{{ file.name | limitTo: 35 }}{{ file.name.length > 35 ? '...' : '' }}</p>
                                 <md-tooltip md-direction="top" ng-if="file.name.length > 35">{{file.name}}</md-tooltip>
                             </div>
-
-                            <div flex="40" ng-switch="file.progress" layout-align="center center">
+                            <span flex></span>  
+                            <div flex="40" ng-switch="file.progress">
 
                                 <div ng-switch-when="undefined"></div>
                                 <md-progress-linear md-mode="indeterminate" ng-switch-when="100"></md-progress-linear>
-                                <p ng-switch-when="101" md-colors="{color: 'default-primary-hue-2'}">Completed!</p>
+                                <div ng-switch-when="101" md-colors="{color: 'default-primary-hue-2'}"><span></span><p>Completed</p></div>
                                 <md-progress-linear md-mode="determinate" value="{{file.progress}}" ng-switch-default></md-progress-linear>
 
                             </div>
@@ -88,8 +94,6 @@
 
         </md-dialog-content>
 
-        <md-dialog-actions md-colors="{background: 'default-accent'}" md-whiteframe="8">
-            <md-button ng-disabled="(!uploadForm.$valid) || $ctrl.experiment.files.length == 0" ng-click="$ctrl.uploadFiles()">Submit</button>
-        </md-dialog-actions>
+       
     </form>
 </md-dialog>

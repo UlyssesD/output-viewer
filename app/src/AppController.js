@@ -11,27 +11,7 @@ function AppController( MenuDataService, TableDataService, Upload, $mdSidenav) {
 
     self.openStatistics   = openStatistics;
 
-/*
-    TableDataService.loadVariantsFromQuery({
-            'limit': 5,
-            'page': 1,
-            'skip': 0
-        }).then(function(data){ console.log('trallallero'); console.log(data)});
-*/
-    
 
-    console.log(self.data);
-/*
-    TableDataService.loadData('api/file_queue/test_vcf.json');
-    TableDataService
-        .passData()
-        .then( function (items)  {
-            self.data = items;
-            
-            console.log(self.data);
-        });
-
-*/   
     // *********************************
     // Internal methods
     // *********************************

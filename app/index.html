@@ -36,34 +36,34 @@
       <h1>
         <span>My files</span>
         <md-icon class="material-icons" md-font-set='material-icons' style="color: white">chevron_right</md-icon>
-        <span>U11_80M_R2.annotated.hg19_multianno</span>
-      </h1>
+<span>U11_80M_R2.annotated.hg19_multianno</span>
+</h1>
 
-    </section>
-    <section flex="15" layout="row" layout-align="end center">
+</section>
+<section flex="15" layout="row" layout-align="end center">
 
-      <md-button class="md-raised md-accent" ng-click="app.openStatistics()">
-        Statistics
-      </md-button>
-    </section>
-  </md-toolbar>
+  <md-button class="md-raised md-accent" ng-click="app.openStatistics()">
+    Statistics
+  </md-button>
+</section>
+</md-toolbar>
 
-  <section layout="row" flex>
+<section layout="row" flex>
 
-    <section layout="column" flex="15">
-      <menu-list></menu-list>
-    </section>
+  <section layout="column" flex="15">
+    <menu-list></menu-list>
+  </section>
 
-    <md-divider></md-divider>
-    <!-- Container #2 -->
+  <md-divider></md-divider>
+  <!-- Container #2 -->
 
-    <!-- Container #3 (Tolto qui)-->
+  <!-- Container #3 (Tolto qui)-->
 
-    <!--      
+  <!--      
       <div flex=30 layout="column">  
         <md-card>-->
-    <!--<img src="card-image.png" class="md-card-image" alt="image caption">-->
-    <!--          <md-card-content>
+  <!--<img src="card-image.png" class="md-card-image" alt="image caption">-->
+  <!--          <md-card-content>
             <h2>Seleziona un file</h2>
             <p>Selezionare il file che si intende visualizzare.</p>
           </md-card-content>
@@ -72,30 +72,30 @@
           </md-card-actions>
         </md-card>-->
 
-    <!--        <md-content flex="50" class="content md-whiteframe-2dp" layout-margin layout-padding>
+  <!--        <md-content flex="50" class="content md-whiteframe-2dp" layout-margin layout-padding>
           Posizione occupata dai filtri
         </md-content>-->
 
-    <!-- Custom UserDetails component -->
-    <!--<user-details
+  <!-- Custom UserDetails component -->
+  <!--<user-details
           selected="app.selected" >
       </user-details>-->
-    <!--</div>-->
-    <ng-view layout="column" md-colors="{background: 'default-grey-200'}" flex>
-      <!-- Container #4 -->
-      <!--<div flex layout="row">-->
+  <!--</div>-->
+  <ng-view layout="column" md-colors="{background: 'default-grey-200'}" flex>
+    <!-- Container #4 -->
+    <!--<div flex layout="row">-->
 
-    </ng-view>
+  </ng-view>
 
 
-  </section>
+</section>
 
-  <script src="./jspm_packages/system.js" type="text/javascript"></script>
-  <script src="config.js" type="text/javascript"></script>
-  <script type="text/javascript">
+<script src="./jspm_packages/system.js" type="text/javascript"></script>
+<script src="config.js" type="text/javascript"></script>
+<script type="text/javascript">
     System
-        .import('src/boot/boot')
-        .catch( console.error.bind(console) ); // make sure any errors print to console
+      .import('src/boot/boot')
+      .catch(console.error.bind(console)); // make sure any errors print to console
   </script>
 </body>
 

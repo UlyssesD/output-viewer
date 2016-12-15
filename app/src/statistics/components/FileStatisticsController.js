@@ -1,3 +1,5 @@
+import config from "src/statistics/config/vcf.config.json!json";
+
 class FileStatisticsController {
 
     /** Costruttore
@@ -8,28 +10,12 @@ class FileStatisticsController {
         var self = this;
         self.$log = $log;
 
-        self.config = {};
+        self.config = config;
 
         self.query = {
             'file': $routeParams.filename
         }
 
-        // Caricamento del file di config
-        $http.get('src/statistics/config/vcf.config.json')
-            .then(
-
-            function (response) {
-                console.log("Loaded FileStatistics configuration file");
-                self.config = response.data;
-
-                console.log(self.config);
-            },
-
-            function (error) {
-                console.log("Some error occurred");
-            }
-
-            );
 
 
         FileStatisticsService.loadFileStatistics(self.query).then(function (data) {

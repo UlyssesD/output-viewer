@@ -1,7 +1,7 @@
 <section layout="row">
-        <md-list flex md-colors="{background: 'background-A100'}">
+        <md-list flex  layout-padding>
             <ng-repeat ng-repeat="el in $ctrl.data.elements track by $index">
-                <md-list-item href="#details/{{el.name}}" flex aria-label="{{el.name}}">
+                <md-list-item href="#details/{{el.name}}" flex aria-label="{{el.name}}" class="md-whiteframe-4dp" md-colors="{background: 'background-A100'}">
                     <p>{{el.name}}</p>
                     </div>
                 </md-list-item>

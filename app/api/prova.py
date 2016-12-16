@@ -14,25 +14,26 @@ def main(argv):
     
     # Ottengo la stringa relativa al file da processare
     input_file = argv[0]
-    username =  argv[1]
-    experiment = argv[2]
-    species = argv[3]
-
+    temp_folder = argv[1]
+    username =  argv[2]
+    experiment = argv[3]
+    species = argv[4]
+    
     config = json.load(open('../configuration.json'))
     
     temp_token = username + '_' + str(uuid.uuid4()) 
 
     # File csv per i nodi del grafo
     
-    variant_csv = open('temp/' + temp_token + '_variant.csv', 'w')
-    info_csv = open('temp/' + temp_token + '_info.csv','w')
-    genotype_csv = open('temp/' + temp_token + '_genotype.csv','w')
+    variant_csv = open(temp_folder + temp_token + '_variant.csv', 'w')
+    info_csv = open(temp_folder + temp_token + '_info.csv','w')
+    genotype_csv = open(temp_folder + temp_token + '_genotype.csv','w')
     
     # File csv per le relazioni del grafo
-    of_species_csv = open('temp/' + temp_token + '_of_species.csv', 'w')
-    contains_csv = open('temp/' + temp_token + '_contains.csv', 'w')
-    supported_by_csv = open('temp/' + temp_token + '_supported_by.csv', 'w')
-    for_variant_csv = open('temp/' + temp_token + '_for_variant.csv', 'w')
+    of_species_csv = open(temp_folder + temp_token + '_of_species.csv', 'w')
+    contains_csv = open(temp_folder + temp_token + '_contains.csv', 'w')
+    supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
+    for_variant_csv = open(temp_folder + temp_token + '_for_variant.csv', 'w')
 
     # Inizializzo i writer per tutti i file
     
@@ -291,44 +292,44 @@ def main(argv):
     queries = [
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_variant.csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder + temp_token + "_variant.csv' as line",
             "MERGE (v:Variant {variant_id: line.variant_id})",
             "ON CREATE SET v += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_info.csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_info.csv' as line",
             "CREATE (i:Info) SET i += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_genotype.csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_genotype.csv' as line",
             "MERGE (g:Genotype {sample: line.sample})"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_contains.csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_contains.csv' as line",
             "MATCH (f:File) WHERE f.name = line.name WITH line, f",
             "MATCH(i:Info) WHERE i.info_id = line.info_id",
             "CREATE (f)-[:Contains]->(i)"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_for_variant.csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_for_variant.csv' as line",
             "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
             "MATCH(i:Info) WHERE i.info_id = line.info_id",
             "CREATE (i)-[f:For_Variant]->(v) SET f += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_supported_by.csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by.csv' as line",
             "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
             "MATCH(g:Genotype) WHERE g.sample= line.sample",
             "CREATE (i)-[s:Supported_By]->(g) SET s += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'http://"+ config["website"]["address"] +"app/api/temp/" + temp_token + "_of_species.csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_of_species.csv' as line",
             "MATCH(s:Species) WHERE s.species = line.species WITH line, s",
             "MATCH(g:Genotype) WHERE g.sample= line.sample",
             "CREATE (g)-[:Of_Species]->(s)"
@@ -347,13 +348,13 @@ def main(argv):
     print 'Done.'
 
     os.remove(input_file)
-    os.remove('./temp/'  + temp_token + '_variant.csv')
-    os.remove('./temp/'  + temp_token + '_info.csv')
-    os.remove('./temp/'  + temp_token + '_genotype.csv')
-    os.remove('./temp/'  + temp_token + '_of_species.csv')
-    os.remove('./temp/'  + temp_token + '_contains.csv')
-    os.remove('./temp/'  + temp_token + '_supported_by.csv')
-    os.remove('./temp/'  + temp_token + '_for_variant.csv')
+    # os.remove(temp_folder + temp_token + '_variant.csv')
+    # os.remove(temp_folder + temp_token + '_info.csv')
+    # os.remove(temp_folder + temp_token + '_genotype.csv')
+    # os.remove(temp_folder + temp_token + '_of_species.csv')
+    # os.remove(temp_folder + temp_token + '_contains.csv')
+    # os.remove(temp_folder + temp_token + '_supported_by.csv')
+    # os.remove(temp_folder + temp_token + '_for_variant.csv')
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+import config from "configuration.json!json";
+
 class FileUploaderController {
 
     constructor($http, $q, $log, $mdDialog, Upload) {
@@ -8,7 +10,7 @@ class FileUploaderController {
         self.$mdDialog = $mdDialog;
         self.Upload = Upload;
 
-        self.config = {};
+        //self.config = config;
         self.data = null;
         self.species = {
             searchTerm: '',
@@ -99,6 +101,7 @@ class FileUploaderController {
                     headers: { 'Content-Type': 'text' },
                     data: { 
                         'targetPath': 'file_queue/',
+                        'tempFolder': config.neo4j.temp_folder,
                         'username': 'lola',
                         'experiment': self.experiment.name, 
                         'type': self.experiment.type,

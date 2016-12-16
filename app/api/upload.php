@@ -4,6 +4,7 @@
   $meta = $_POST;
   echo $filename . ', size: ' . $_FILES['file']['size'];
   $destination = $meta['targetPath'] . $filename;
+  $tempFolder = escapeshellarg($meta['tempFolder']);
   $username = escapeshellarg($meta['username']);
   $experiment = escapeshellarg($meta['experiment']);
   $type = escapeshellarg($meta['type']);
@@ -11,6 +12,6 @@
 
   move_uploaded_file( $_FILES['file']['tmp_name'] , $destination );
 
-  exec('python prova.py ' . $destination . ' '.  $username . ' ' . $experiment . ' ' . $species, $out);
+  exec('python prova.py ' . $destination . ' '. $tempFolder . ' ' .  $username . ' ' . $experiment . ' ' . $species, $out);
 ?>
 

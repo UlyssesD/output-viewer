@@ -65,24 +65,27 @@ def main(argv):
     
     # Ricavo gli header per formats e info (necessari per avere gli header dei csv rispettivamente di Genotype e Info)
     print 'Retrieving formats and infos...'
-    supported_by_header = set(["info_id", "sample", "phased", "state"] + reader.formats.keys()) 
-    info_header = set(reader.infos.keys())
+    supported_by_header = ["info_id", "sample", "phased", "state"] + reader.formats.keys()
+    info_header = ["info_id"]  + reader.infos.keys()
 
+    # supported_by_header = set(["info_id", "sample", "phased", "state"] + reader.formats.keys()) 
+    # info_header = set(reader.infos.keys())
+    
     genotypes = set()
 
-    for record in reader:
+    #for record in reader:
         
 
 
-        for key in record.INFO.keys():
-            info_header.add(key)
-        for key in record.FORMAT.split(':'):
-            supported_by_header.add(key)
+    #    for key in record.INFO.keys():
+    #        info_header.add(key)
+    #    for key in record.FORMAT.split(':'):
+    #        supported_by_header.add(key)
 
-    file.close()
+    #file.close()
 
-    supported_by_header = list(supported_by_header)
-    info_header = list(info_header) + ["info_id"]
+    # supported_by_header = list(supported_by_header)
+    # info_header = list(info_header) + ["info_id"]
 
     # Scrivo gli header dei nodi nei rispettivi file
     variantWriter.writerow(variant_header)

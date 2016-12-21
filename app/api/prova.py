@@ -2,16 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import uuid
-import sys, os
-import re, json
-import vcf, csv
-
+import sys
+import os
+import re
+import json
+import vcf
+import csv
+import glob
 import pymongo
 from pymongo import MongoClient
 from neo4j.v1 import GraphDatabase, basic_auth
 
 def main(argv):
     
+    
+    info_id = 0
+
     # Ottengo la stringa relativa al file da processare
     input_file = argv[0]
     temp_folder = argv[1]
@@ -22,7 +28,7 @@ def main(argv):
     config = json.load(open('../configuration.json'))
     
     temp_token = username + '_' + str(uuid.uuid4()) 
-
+    part_count = 0
     # File csv per i nodi del grafo
     
     variant_csv = open(temp_folder + temp_token + '_variant.csv', 'w')
@@ -32,7 +38,7 @@ def main(argv):
     # File csv per le relazioni del grafo
     of_species_csv = open(temp_folder + temp_token + '_of_species.csv', 'w')
     contains_csv = open(temp_folder + temp_token + '_contains.csv', 'w')
-    supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
+    supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w')
     for_variant_csv = open(temp_folder + temp_token + '_for_variant.csv', 'w')
 
     # Inizializzo i writer per tutti i file
@@ -118,10 +124,12 @@ def main(argv):
         "not_in_1000g": 0
     }
    
+    row_count = 0 # Utilizzato per splittare il file ogni tot righe
+
     file = open(input_file, 'r')
     reader = vcf.VCFReader(file)
     for record in reader:
-        
+        row_count += 1
         # Genero il nodo corrispondente alla variante
         variant = {
             "variant_id": record.CHROM + ':' + str(record.POS) + ':' + record.REF + ':' + ";".join(str(v) for v in record.ALT) if isinstance(record.ALT,list) else record.ALT, # id randomico utilizzato per indicizzare le varianti
@@ -204,7 +212,7 @@ def main(argv):
             genotype = {
                 "sample": sample.sample,
                 "phased": sample.phased,
-                "state": sample.gt_type
+                "state" : sample.gt_type or 'None'
             }
 
             for i in range(len(format_vars)): 
@@ -237,6 +245,18 @@ def main(argv):
                 for_variant_row.append( variant[item]) 
 
         forVariantWriter.writerow(for_variant_row)
+
+
+        if not (row_count % 15000):
+            print str(row_count) + " scanned"
+            part_count += 1
+            supported_by_csv.close() # Chiudo il file
+            supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w') # ne creo uno nuovo
+            supportedByWriter = csv.writer(supported_by_csv, delimiter=',') #Riapro il writer
+            supportedByWriter.writerow(supported_by_header)
+
+
+
 
 
     for item in list(genotypes):
@@ -325,13 +345,6 @@ def main(argv):
         ],
         [
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by.csv' as line",
-            "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
-            "MATCH(g:Genotype) WHERE g.sample= line.sample",
-            "CREATE (i)-[s:Supported_By]->(g) SET s += line"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
             "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_of_species.csv' as line",
             "MATCH(s:Species) WHERE s.species = line.species WITH line, s",
             "MATCH(g:Genotype) WHERE g.sample= line.sample",
@@ -343,14 +356,25 @@ def main(argv):
     for query in queries:
         session.run( " ".join(query) )
 
-    
+    print range(part_count + 1)
+
+
+    for part in range(part_count + 1):
+        session.run(" ".join([
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by_" +  str(part) + ".csv' as line",
+            "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
+            "MATCH(g:Genotype) WHERE g.sample= line.sample",
+            "CREATE (i)-[s:Supported_By]->(g) SET s += line"
+            ])
+        )
     
 
     # Chiudo la sessione di Neo4j e termino
     session.close()
     print 'Done.'
 
-    os.remove(input_file)
+    # os.remove(input_file)
     # os.remove(temp_folder + temp_token + '_variant.csv')
     # os.remove(temp_folder + temp_token + '_info.csv')
     # os.remove(temp_folder + temp_token + '_genotype.csv')

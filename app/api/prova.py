@@ -38,7 +38,8 @@ def main(argv):
     # File csv per le relazioni del grafo
     of_species_csv = open(temp_folder + temp_token + '_of_species.csv', 'w')
     contains_csv = open(temp_folder + temp_token + '_contains.csv', 'w')
-    supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w')
+    #supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w')
+    supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
     for_variant_csv = open(temp_folder + temp_token + '_for_variant.csv', 'w')
 
     # Inizializzo i writer per tutti i file
@@ -107,6 +108,22 @@ def main(argv):
     # Versione che salva le righe del file in GraphDB
     print 'Parsing file...'
 
+    # Connessione a Neo4j
+    driver = GraphDatabase.driver("bolt://" + config["neo4j"]["address"], auth=basic_auth(config["neo4j"]["username"], config["neo4j"]["password"]));
+    session = driver.session()
+
+    statements = [
+        "CREATE INDEX ON :File(name);",
+        "CREATE INDEX ON :Species(species);",
+        "CREATE INDEX ON :Variant(variant_id);",
+        "CREATE INDEX ON :Info(info_id);",
+        "CREATE INDEX ON :Genotype(sample);"
+    ]
+
+    for statement in statements:
+        session.run(statement)
+
+    session.close()
     # Creo un nodo corrispondente al file
     properties = {
         "name": os.path.basename(file.name),
@@ -125,6 +142,7 @@ def main(argv):
     }
    
     row_count = 0 # Utilizzato per splittare il file ogni tot righe
+
 
     file = open(input_file, 'r')
     reader = vcf.VCFReader(file)
@@ -251,10 +269,24 @@ def main(argv):
             print str(row_count) + " scanned"
             part_count += 1
             supported_by_csv.close() # Chiudo il file
-            supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w') # ne creo uno nuovo
+            
+            #supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w') # ne creo uno nuovo
+            #supportedByWriter = csv.writer(supported_by_csv, delimiter=',') #Riapro il writer
+            #supportedByWriter.writerow(supported_by_header)
+
+            session = driver.session()
+            session.run(" ".join([
+                    "USING PERIODIC COMMIT 15000",
+                    "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by.csv' as line",
+                    "MERGE (i:Info {info_id: line.info_id}) WITH line, i",
+                    "MERGE (g:Genotype {sample: line.sample}) WITH line, i, g",
+                    "CREATE (i)-[s:Supported_By]->(g) SET s += line"
+                ]))
+            session.close()    
+
+            supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
             supportedByWriter = csv.writer(supported_by_csv, delimiter=',') #Riapro il writer
             supportedByWriter.writerow(supported_by_header)
-
 
 
 
@@ -277,21 +309,7 @@ def main(argv):
     
      # Versione che salva le righe del file in Neo4j
     print 'Populating Database...'
-
-    # Connessione a Neo4j
-    driver = GraphDatabase.driver("bolt://" + config["neo4j"]["address"], auth=basic_auth(config["neo4j"]["username"], config["neo4j"]["password"]));
     session = driver.session()
-
-    statements = [
-        "CREATE INDEX ON :File(name);",
-        "CREATE INDEX ON :Species(species);",
-        "CREATE INDEX ON :Variant(variant_id);",
-        "CREATE INDEX ON :Info(info_id);",
-        "CREATE INDEX ON :Genotype(sample);"
-    ]
-
-    for statement in statements:
-        session.run(statement)
 
     prova = [
        "MERGE (u:User { username:{username} })",
@@ -322,7 +340,7 @@ def main(argv):
         [
             "USING PERIODIC COMMIT 15000",
             "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_info.csv' as line",
-            "CREATE (i:Info) SET i += line"
+            "MERGE (i:Info {info_id: line.info_id}) ON CREATE SET i += line ON MATCH SET i += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
@@ -356,33 +374,43 @@ def main(argv):
     for query in queries:
         session.run( " ".join(query) )
 
-    print range(part_count + 1)
 
-
-    for part in range(part_count + 1):
-        session.run(" ".join([
+    #for part in range(part_count + 1):
+    #    session.run(" ".join([
+    #        "USING PERIODIC COMMIT 15000",
+    #        "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by_" +  str(part) + ".csv' as line",
+    #        "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
+    #        "MATCH(g:Genotype) WHERE g.sample= line.sample",
+    #        "CREATE (i)-[s:Supported_By]->(g) SET s += line"
+    #        ])
+    #    )
+    
+    session.run(" ".join([
             "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by_" +  str(part) + ".csv' as line",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by.csv' as line",
             "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
             "MATCH(g:Genotype) WHERE g.sample= line.sample",
             "CREATE (i)-[s:Supported_By]->(g) SET s += line"
             ])
         )
-    
 
     # Chiudo la sessione di Neo4j e termino
     session.close()
-    print 'Done.'
+    
 
     # os.remove(input_file)
-    # os.remove(temp_folder + temp_token + '_variant.csv')
-    # os.remove(temp_folder + temp_token + '_info.csv')
-    # os.remove(temp_folder + temp_token + '_genotype.csv')
-    # os.remove(temp_folder + temp_token + '_of_species.csv')
-    # os.remove(temp_folder + temp_token + '_contains.csv')
-    # os.remove(temp_folder + temp_token + '_supported_by.csv')
-    # os.remove(temp_folder + temp_token + '_for_variant.csv')
-
+    #os.remove(temp_folder + temp_token + '_variant.csv')
+    #os.remove(temp_folder + temp_token + '_info.csv')
+    #os.remove(temp_folder + temp_token + '_genotype.csv')
+    #os.remove(temp_folder + temp_token + '_of_species.csv')
+    #os.remove(temp_folder + temp_token + '_contains.csv')
+    #os.remove(temp_folder +  temp_token + "_supported_by.csv"))
+    #for part in range(part_count + 1):
+    #    os.remove(temp_folder +  temp_token + "_supported_by_" +  str(part) + ".csv")
+    
+    os.remove(temp_folder + temp_token + '_for_variant.csv')
+   
+    print 'Done.'
 
 if __name__ == "__main__":
    main(sys.argv[1:])

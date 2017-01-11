@@ -26,7 +26,7 @@ def main(argv):
     species = argv[4]
     
     config = json.load(open('../configuration.json'))
-    
+
     temp_token = username + '_' + str(uuid.uuid4()) 
     part_count = 0
     # File csv per i nodi del grafo
@@ -34,26 +34,35 @@ def main(argv):
     variant_csv = open(temp_folder + temp_token + '_variant.csv', 'w')
     info_csv = open(temp_folder + temp_token + '_info.csv','w')
     genotype_csv = open(temp_folder + temp_token + '_genotype.csv','w')
-    
+    gene_csv = open(temp_folder + temp_token + '_gene.csv', 'w')
+    chromosome_csv = open(temp_folder + temp_token + '_chromosome.csv', 'w')
+
     # File csv per le relazioni del grafo
     of_species_csv = open(temp_folder + temp_token + '_of_species.csv', 'w')
     contains_csv = open(temp_folder + temp_token + '_contains.csv', 'w')
     #supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w')
     supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
     for_variant_csv = open(temp_folder + temp_token + '_for_variant.csv', 'w')
+    in_variant_csv = open(temp_folder + temp_token + '_in_variant.csv', 'w')
+    has_variant_csv = open(temp_folder + temp_token + '_has_variant.csv', 'w')
+    in_chromosome_csv = open(temp_folder + temp_token + '_in_chromosome.csv', 'w')
 
     # Inizializzo i writer per tutti i file
     
     variantWriter = csv.writer(variant_csv, delimiter=',')
     infoWriter = csv.writer(info_csv, delimiter=',')
     genotypeWriter = csv.writer(genotype_csv, delimiter=',')
+    geneWriter = csv.writer(gene_csv, delimiter=',')
+    chromosomeWriter = csv.writer(chromosome_csv, delimiter=',')
 
     ofSpeciesWriter = csv.writer(of_species_csv, delimiter=',')
     containsWriter = csv.writer(contains_csv, delimiter=',')
     supportedByWriter = csv.writer(supported_by_csv, delimiter=',')
     forVariantWriter = csv.writer(for_variant_csv, delimiter=',')
+    inVariantWriter = csv.writer(in_variant_csv, delimiter=',')
+    hasVariantWriter = csv.writer(has_variant_csv, delimiter=',')
+    inChromosomeWriter = csv.writer(in_chromosome_csv, delimiter=',')
 
-    
     print 'Starting parsing procedure for file ' + input_file
 
     print 'Opening .vcf file...'
@@ -64,11 +73,16 @@ def main(argv):
     # Costruisco gli header dei nodi
     variant_header = ["variant_id", "CHROM", "POS", "REF", "ALT"]
     genotype_header = ["sample"]
+    gene_header = ["gene_id"]
+    chromosome_header = ["chromosome"]
 
     # Cotruisco gli header delle relazioni
     contains_header = ["name", "info_id"]
     for_variant_header = ["info_id", "variant_id", "START", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "MUTATION", "dbSNP"]
     of_species_header = ["sample", "species"]
+    in_variant_header = ["gene_id", "variant_id"]
+    has_variant_header = ["chromosome", "variant_id"]
+    in_chromosome_header = ["gene_id", "chromosome"]
     
     # Ricavo gli header per formats e info (necessari per avere gli header dei csv rispettivamente di Genotype e Info)
     print 'Retrieving formats and infos...'
@@ -79,7 +93,8 @@ def main(argv):
     # info_header = set(reader.infos.keys())
     
     genotypes = set()
-
+    genes = set()
+    chromosomes = set()
     #for record in reader:
         
 
@@ -98,12 +113,17 @@ def main(argv):
     variantWriter.writerow(variant_header)
     genotypeWriter.writerow(genotype_header)
     infoWriter.writerow(info_header)
+    geneWriter.writerow(gene_header)
+    chromosomeWriter.writerow(chromosome_header)    
 
     # Scrivo gli header delle relazioni nei rispettivi file
     supportedByWriter.writerow(supported_by_header)
     containsWriter.writerow(contains_header)
     ofSpeciesWriter.writerow(of_species_header)
     forVariantWriter.writerow(for_variant_header)
+    inVariantWriter.writerow(in_variant_header)
+    hasVariantWriter.writerow(has_variant_header)
+    inChromosomeWriter.writerow(in_chromosome_header)    
 
     # Versione che salva le righe del file in GraphDB
     print 'Parsing file...'
@@ -117,7 +137,9 @@ def main(argv):
         "CREATE INDEX ON :Species(species);",
         "CREATE INDEX ON :Variant(variant_id);",
         "CREATE INDEX ON :Info(info_id);",
-        "CREATE INDEX ON :Genotype(sample);"
+        "CREATE INDEX ON :Genotype(sample);",
+        "CREATE INDEX ON :Gene(gene_id);",
+        "CREATE INDEX ON :Chromosome(chromosome);"
     ]
 
     for statement in statements:
@@ -127,6 +149,7 @@ def main(argv):
     # Creo un nodo corrispondente al file
     properties = {
         "name": os.path.basename(file.name),
+        "extension": os.path.splitext(input_file)[1],
         "total": 0,
         "hom": 0,
         "het": 0,
@@ -265,6 +288,19 @@ def main(argv):
         forVariantWriter.writerow(for_variant_row)
 
 
+        # Aggiungo cromosomi e geni (e relative relazioni)
+        chromosomes.add(record.CHROM)
+        hasVariantWriter.writerow([ record.CHROM, variant["variant_id"] ])
+
+        for g in record.INFO['Gene.refGene']:
+            if not (g == 'NONE'):
+                genes.add(g)
+                inChromosomeWriter.writerow([ g, record.CHROM ])
+                inVariantWriter.writerow([ g, variant["variant_id"] ])
+                
+
+
+
         if not (row_count % 15000):
             print str(row_count) + " scanned"
             part_count += 1
@@ -289,7 +325,12 @@ def main(argv):
             supportedByWriter.writerow(supported_by_header)
 
 
-
+    for item in list(genes):
+        geneWriter.writerow([ item ])
+        
+    for item in list(chromosomes):
+        chromosomeWriter.writerow([ item ])
+        
 
     for item in list(genotypes):
         genotypeWriter.writerow( [ item ] )
@@ -301,11 +342,16 @@ def main(argv):
     variant_csv.close()
     info_csv.close()
     genotype_csv.close()
+    gene_csv.close()
+    chromosome_csv.close()
     
     of_species_csv.close()
     contains_csv.close()
     supported_by_csv.close()
     for_variant_csv.close()
+    in_variant_csv.close()
+    has_variant_csv.close()
+    in_chromosome_csv.close()
     
      # Versione che salva le righe del file in Neo4j
     print 'Populating Database...'
@@ -349,6 +395,16 @@ def main(argv):
         ],
         [
             "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_gene.csv' as line",
+            "MERGE (g:Gene {gene_id: line.gene_id})"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_chromosome.csv' as line",
+            "MERGE (c:Chromosome {chromosome: line.chromosome})"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
             "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_contains.csv' as line",
             "MATCH (f:File) WHERE f.name = line.name WITH line, f",
             "MATCH(i:Info) WHERE i.info_id = line.info_id",
@@ -367,6 +423,27 @@ def main(argv):
             "MATCH(s:Species) WHERE s.species = line.species WITH line, s",
             "MATCH(g:Genotype) WHERE g.sample= line.sample",
             "CREATE (g)-[:Of_Species]->(s)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_in_variant.csv' as line",
+            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
+            "MATCH(g:Gene) WHERE g.gene_id = line.gene_id",
+            "CREATE (g)-[:In_Variant]->(v)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_has_variant.csv' as line",
+            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
+            "MATCH(c:Chromosome) WHERE c.chromosome = line.chromosome",
+            "CREATE (c)-[:Has_Variant]->(v)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_in_chromosome.csv' as line",
+            "MATCH(g:Gene) WHERE g.gene_id = line.gene_id WITH line, g",
+            "MATCH(c:Chromosome) WHERE c.chromosome = line.chromosome",
+            "MERGE (g)-[:In_Chromosome]->(c)"
         ]
     ]
 
@@ -399,16 +476,22 @@ def main(argv):
     
 
     # os.remove(input_file)
-    #os.remove(temp_folder + temp_token + '_variant.csv')
-    #os.remove(temp_folder + temp_token + '_info.csv')
-    #os.remove(temp_folder + temp_token + '_genotype.csv')
-    #os.remove(temp_folder + temp_token + '_of_species.csv')
-    #os.remove(temp_folder + temp_token + '_contains.csv')
-    #os.remove(temp_folder +  temp_token + "_supported_by.csv"))
+    os.remove(temp_folder + temp_token + '_variant.csv')
+    os.remove(temp_folder + temp_token + '_info.csv')
+    os.remove(temp_folder + temp_token + '_genotype.csv')
+    os.remove(temp_folder + temp_token + '_gene.csv')
+    os.remove(temp_folder + temp_token + '_chromosome.csv')
+    os.remove(temp_folder + temp_token + '_of_species.csv')
+    os.remove(temp_folder + temp_token + '_contains.csv')
+    os.remove(temp_folder +  temp_token + "_supported_by.csv")
     #for part in range(part_count + 1):
     #    os.remove(temp_folder +  temp_token + "_supported_by_" +  str(part) + ".csv")
     
     os.remove(temp_folder + temp_token + '_for_variant.csv')
+    os.remove(temp_folder + temp_token + '_in_variant.csv')
+    os.remove(temp_folder + temp_token + '_has_variant.csv')
+    os.remove(temp_folder + temp_token + '_in_chromosome.csv')
+    
    
     print 'Done.'
 

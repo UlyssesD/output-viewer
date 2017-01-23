@@ -1,5 +1,5 @@
-# !/usr/bin/python   # Script python per il parsing del file caricato in upload su server da elaborare in formato json
-# -*- coding: utf-8 -*-
+# !/usr/bin/env python   # Script python per il parsing di file in formato VCF da inserire in Neo4j
+
 
 import uuid
 import sys
@@ -13,8 +13,7 @@ import pymongo
 from pymongo import MongoClient
 from neo4j.v1 import GraphDatabase, basic_auth
 
-def main(argv):
-    
+def main(argv):  
     
     info_id = 0
 
@@ -71,14 +70,14 @@ def main(argv):
 
 
     # Costruisco gli header dei nodi
-    variant_header = ["variant_id", "CHROM", "POS", "REF", "ALT"]
+    variant_header = ["variant_id", "CHROM", "POS", "REF", "ALT", "MUTATION"]
     genotype_header = ["sample"]
     gene_header = ["gene_id"]
     chromosome_header = ["chromosome"]
 
     # Cotruisco gli header delle relazioni
     contains_header = ["name", "info_id"]
-    for_variant_header = ["info_id", "variant_id", "START", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "MUTATION", "dbSNP"]
+    for_variant_header = ["info_id", "variant_id", "START", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "dbSNP"]
     of_species_header = ["sample", "species"]
     in_variant_header = ["gene_id", "variant_id"]
     has_variant_header = ["chromosome", "variant_id"]
@@ -167,8 +166,6 @@ def main(argv):
     row_count = 0 # Utilizzato per splittare il file ogni tot righe
 
 
-    file = open(input_file, 'r')
-    reader = vcf.VCFReader(file)
     for record in reader:
         row_count += 1
         # Genero il nodo corrispondente alla variante

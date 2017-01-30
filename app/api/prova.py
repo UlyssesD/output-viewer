@@ -1,5 +1,5 @@
 # !/usr/bin/env python   # Script python per il parsing di file in formato VCF da inserire in Neo4j
-
+# -*- coding: utf-8 -*-
 
 import uuid
 import sys
@@ -9,13 +9,98 @@ import json
 import vcf
 import csv
 import glob
-import pymongo
-from pymongo import MongoClient
 from neo4j.v1 import GraphDatabase, basic_auth
+
+
+# Queries per il popolamento del database per il file vcf
+queries = [
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_variant.csv' as line",
+            "MERGE (v:Variant {variant_id: line.variant_id})",
+            "ON CREATE SET v += line"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_info.csv' as line FIELDTERMINATOR '\t'",
+            "MERGE (i:Info {info_id: line.info_id}) ON CREATE SET i += line ON MATCH SET i += line"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_genotype.csv' as line",
+            "MERGE (g:Genotype {sample: line.sample})"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_gene.csv' as line",
+            "MERGE (g:Gene {gene_id: line.gene_id})"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_chromosome.csv' as line",
+            "MERGE (c:Chromosome {chromosome: line.chromosome})"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_contains.csv' as line",
+            "MATCH (f:File) WHERE f.name = line.name WITH line, f",
+            "MATCH(i:Info) WHERE i.info_id = line.info_id",
+            "CREATE (f)-[:Contains]->(i)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_for_variant.csv' as line",
+            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
+            "MATCH(i:Info) WHERE i.info_id = line.info_id",
+            "CREATE (i)-[f:For_Variant]->(v) SET f += line"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_of_species.csv' as line",
+            "MATCH(s:Species) WHERE s.species = line.species WITH line, s",
+            "MATCH(g:Genotype) WHERE g.sample= line.sample",
+            "CREATE (g)-[:Of_Species]->(s)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_in_variant.csv' as line",
+            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
+            "MATCH(g:Gene) WHERE g.gene_id = line.gene_id",
+            "CREATE (g)-[:In_Variant]->(v)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_has_variant.csv' as line",
+            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
+            "MATCH(c:Chromosome) WHERE c.chromosome = line.chromosome",
+            "CREATE (c)-[:Has_Variant]->(v)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_in_chromosome.csv' as line",
+            "MATCH(g:Gene) WHERE g.gene_id = line.gene_id WITH line, g",
+            "MATCH(c:Chromosome) WHERE c.chromosome = line.chromosome",
+            "MERGE (g)-[:In_Chromosome]->(c)"
+        ],
+        [
+            "USING PERIODIC COMMIT 15000",
+            "LOAD CSV WITH HEADERS from 'File:///{token}_supported_by.csv' as line FIELDTERMINATOR '\t'",
+            "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
+            "MATCH(g:Genotype) WHERE g.sample= line.sample",
+            "CREATE (i)-[s:Supported_By]->(g) SET s += line"
+        ]
+    ]
+
+def populateDB(driver, token):
+
+    for query in queries:
+        session = driver.session()
+        session.run(" ".join(query).replace('{token}', token))
+        session.close()
+
 
 def main(argv):  
     
-    info_id = 0
 
     # Ottengo la stringa relativa al file da processare
     input_file = argv[0]
@@ -27,95 +112,88 @@ def main(argv):
     config = json.load(open('../configuration.json'))
 
     temp_token = username + '_' + str(uuid.uuid4()) 
-    part_count = 0
-    # File csv per i nodi del grafo
+
     
+    # Creo i csv per memorizzare le informazioni sui nodi
     variant_csv = open(temp_folder + temp_token + '_variant.csv', 'w')
     info_csv = open(temp_folder + temp_token + '_info.csv','w')
     genotype_csv = open(temp_folder + temp_token + '_genotype.csv','w')
     gene_csv = open(temp_folder + temp_token + '_gene.csv', 'w')
     chromosome_csv = open(temp_folder + temp_token + '_chromosome.csv', 'w')
 
-    # File csv per le relazioni del grafo
+    # Creo i csv per memorizzare le informazioni sulle relazioni
     of_species_csv = open(temp_folder + temp_token + '_of_species.csv', 'w')
     contains_csv = open(temp_folder + temp_token + '_contains.csv', 'w')
-    #supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w')
     supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
     for_variant_csv = open(temp_folder + temp_token + '_for_variant.csv', 'w')
     in_variant_csv = open(temp_folder + temp_token + '_in_variant.csv', 'w')
     has_variant_csv = open(temp_folder + temp_token + '_has_variant.csv', 'w')
     in_chromosome_csv = open(temp_folder + temp_token + '_in_chromosome.csv', 'w')
 
+    
     # Inizializzo i writer per tutti i file
     
+    # ---- nodi 
     variantWriter = csv.writer(variant_csv, delimiter=',')
-    infoWriter = csv.writer(info_csv, delimiter=',')
+    infoWriter = csv.writer(info_csv, delimiter='\t')
     genotypeWriter = csv.writer(genotype_csv, delimiter=',')
     geneWriter = csv.writer(gene_csv, delimiter=',')
     chromosomeWriter = csv.writer(chromosome_csv, delimiter=',')
 
+    # ---- relazioni
     ofSpeciesWriter = csv.writer(of_species_csv, delimiter=',')
     containsWriter = csv.writer(contains_csv, delimiter=',')
-    supportedByWriter = csv.writer(supported_by_csv, delimiter=',')
+    supportedByWriter = csv.writer(supported_by_csv, delimiter='\t')
     forVariantWriter = csv.writer(for_variant_csv, delimiter=',')
     inVariantWriter = csv.writer(in_variant_csv, delimiter=',')
     hasVariantWriter = csv.writer(has_variant_csv, delimiter=',')
     inChromosomeWriter = csv.writer(in_chromosome_csv, delimiter=',')
 
-    print 'Starting parsing procedure for file ' + input_file
 
+
+    # Apro il file vcf
     print 'Opening .vcf file...'
     file = open(input_file, 'r')
     reader = vcf.VCFReader(file)
 
 
-    # Costruisco gli header dei nodi
+    # Costruisco gli header dei file
+
+    # ---- nodi
     variant_header = ["variant_id", "CHROM", "POS", "REF", "ALT", "MUTATION"]
     genotype_header = ["sample"]
+    info_header = ["info_id", "attributes"]
     gene_header = ["gene_id"]
     chromosome_header = ["chromosome"]
 
-    # Cotruisco gli header delle relazioni
+    # ---- relazioni
     contains_header = ["name", "info_id"]
     for_variant_header = ["info_id", "variant_id", "START", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "dbSNP"]
     of_species_header = ["sample", "species"]
     in_variant_header = ["gene_id", "variant_id"]
     has_variant_header = ["chromosome", "variant_id"]
     in_chromosome_header = ["gene_id", "chromosome"]
+    supported_by_header = ["info_id", "sample", "phased", "state", "attributes"]
     
-    # Ricavo gli header per formats e info (necessari per avere gli header dei csv rispettivamente di Genotype e Info)
-    print 'Retrieving formats and infos...'
-    supported_by_header = ["info_id", "sample", "phased", "state"] + reader.formats.keys()
-    info_header = ["info_id"]  + reader.infos.keys()
-
-    # supported_by_header = set(["info_id", "sample", "phased", "state"] + reader.formats.keys()) 
-    # info_header = set(reader.infos.keys())
     
+    # Inizializzo le strutture dati necessarie al parsing (per ottimizzare il caricamento dei dati su database)
+    
+    # ---- nodi
     genotypes = set()
     genes = set()
     chromosomes = set()
-    #for record in reader:
-        
 
 
-    #    for key in record.INFO.keys():
-    #        info_header.add(key)
-    #    for key in record.FORMAT.split(':'):
-    #        supported_by_header.add(key)
+    # Scrivo gli header nei rispettivi file
 
-    #file.close()
-
-    # supported_by_header = list(supported_by_header)
-    # info_header = list(info_header) + ["info_id"]
-
-    # Scrivo gli header dei nodi nei rispettivi file
+    # ---- nodi
     variantWriter.writerow(variant_header)
     genotypeWriter.writerow(genotype_header)
     infoWriter.writerow(info_header)
     geneWriter.writerow(gene_header)
     chromosomeWriter.writerow(chromosome_header)    
 
-    # Scrivo gli header delle relazioni nei rispettivi file
+    # ---- relazioni
     supportedByWriter.writerow(supported_by_header)
     containsWriter.writerow(contains_header)
     ofSpeciesWriter.writerow(of_species_header)
@@ -124,13 +202,13 @@ def main(argv):
     hasVariantWriter.writerow(has_variant_header)
     inChromosomeWriter.writerow(in_chromosome_header)    
 
-    # Versione che salva le righe del file in GraphDB
-    print 'Parsing file...'
+    
+    print 'Starting parsing procedure for file ' + input_file
 
     # Connessione a Neo4j
     driver = GraphDatabase.driver("bolt://" + config["neo4j"]["address"], auth=basic_auth(config["neo4j"]["username"], config["neo4j"]["password"]));
+    
     session = driver.session()
-
     statements = [
         "CREATE INDEX ON :File(name);",
         "CREATE INDEX ON :Species(species);",
@@ -140,11 +218,11 @@ def main(argv):
         "CREATE INDEX ON :Gene(gene_id);",
         "CREATE INDEX ON :Chromosome(chromosome);"
     ]
-
     for statement in statements:
         session.run(statement)
-
     session.close()
+
+
     # Creo un nodo corrispondente al file
     properties = {
         "name": os.path.basename(file.name),
@@ -163,11 +241,13 @@ def main(argv):
         "not_in_1000g": 0
     }
    
-    row_count = 0 # Utilizzato per splittare il file ogni tot righe
-
+    # inizializzo un contatore per fare un load parziale del file su database per file troppo grandi
+    row_count = 0 
 
     for record in reader:
+        
         row_count += 1
+        
         # Genero il nodo corrispondente alla variante
         variant = {
             "variant_id": record.CHROM + ':' + str(record.POS) + ':' + record.REF + ':' + ";".join(str(v) for v in record.ALT) if isinstance(record.ALT,list) else record.ALT, # id randomico utilizzato per indicizzare le varianti
@@ -206,7 +286,8 @@ def main(argv):
 
         # Costruisco la stringa della lista degli attributi delle annotazioni (sono costretto a farlo perchè non ho un modo univoco per sapere a priori i campi presenti)
         annotation = {
-            "info_id": uuid.uuid4()
+            "info_id": uuid.uuid4(),
+            "attributes": ""
         }
 
 
@@ -229,8 +310,10 @@ def main(argv):
                     properties['not_in_1000g'] += 1
                 
 
-            annotation[key] = ";".join(str(v) for v in value) if isinstance(value,list) else value
+            annotation["attributes"] += key + "=" + ( ";".join(str(v) for v in value) if isinstance(value,list) else str(value) ) + ","
         
+        # rimuovo la virgola in eccesso alla fine della stringa di attributi
+        annotation["attributes"] = annotation["attributes"].rstrip(',')
 
         info_row = []
 
@@ -250,13 +333,15 @@ def main(argv):
             genotype = {
                 "sample": sample.sample,
                 "phased": sample.phased,
-                "state" : sample.gt_type or 'None'
+                "state" : sample.gt_type or 'None',
+                "attributes": ""
             }
 
             for i in range(len(format_vars)): 
                 #attributes = attributes + format_vars[i] + ': {' + format_vars[i] + '}, ' 
-                genotype[format_vars[i]] = ";".join(str(v) for v in sample.data[i]) if isinstance(sample.data[i],list) else sample.data[i]
+                genotype["attributes"] += format_vars[i] + "=" + (";".join(str(v) for v in sample.data[i]) if isinstance(sample.data[i],list) else str(sample.data[i]) ) + ","
 
+            genotype["attributes"] = genotype["attributes"].rstrip(',')
 
             supported_by_row = [  ]
 
@@ -300,26 +385,89 @@ def main(argv):
 
         if not (row_count % 15000):
             print str(row_count) + " scanned"
-            part_count += 1
-            supported_by_csv.close() # Chiudo il file
             
-            #supported_by_csv = open(temp_folder + temp_token + '_supported_by_' + str(part_count) + '.csv', 'w') # ne creo uno nuovo
-            #supportedByWriter = csv.writer(supported_by_csv, delimiter=',') #Riapro il writer
-            #supportedByWriter.writerow(supported_by_header)
+            variant_csv.close()
+            info_csv.close()
+            genotype_csv.close()
+            gene_csv.close()
+            chromosome_csv.close()
+            
+            of_species_csv.close()
+            contains_csv.close()
+            supported_by_csv.close()
+            for_variant_csv.close()
+            in_variant_csv.close()
+            has_variant_csv.close()
+            in_chromosome_csv.close()
+            
+            populateDB(driver, temp_folder + temp_token)
 
-            session = driver.session()
-            session.run(" ".join([
-                    "USING PERIODIC COMMIT 15000",
-                    "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by.csv' as line",
-                    "MERGE (i:Info {info_id: line.info_id}) WITH line, i",
-                    "MERGE (g:Genotype {sample: line.sample}) WITH line, i, g",
-                    "CREATE (i)-[s:Supported_By]->(g) SET s += line"
-                ]))
-            session.close()    
+            # Creo i csv per memorizzare le informazioni sui nodi
+            variant_csv = open(temp_folder + temp_token + '_variant.csv', 'w')
+            info_csv = open(temp_folder + temp_token + '_info.csv','w')
+            genotype_csv = open(temp_folder + temp_token + '_genotype.csv','w')
+            gene_csv = open(temp_folder + temp_token + '_gene.csv', 'w')
+            chromosome_csv = open(temp_folder + temp_token + '_chromosome.csv', 'w')
 
+            # Creo i csv per memorizzare le informazioni sulle relazioni
+            of_species_csv = open(temp_folder + temp_token + '_of_species.csv', 'w')
+            contains_csv = open(temp_folder + temp_token + '_contains.csv', 'w')
             supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
-            supportedByWriter = csv.writer(supported_by_csv, delimiter=',') #Riapro il writer
+            for_variant_csv = open(temp_folder + temp_token + '_for_variant.csv', 'w')
+            in_variant_csv = open(temp_folder + temp_token + '_in_variant.csv', 'w')
+            has_variant_csv = open(temp_folder + temp_token + '_has_variant.csv', 'w')
+            in_chromosome_csv = open(temp_folder + temp_token + '_in_chromosome.csv', 'w')
+
+        
+            # Inizializzo i writer per tutti i file
+            
+            # ---- nodi 
+            variantWriter = csv.writer(variant_csv, delimiter=',')
+            infoWriter = csv.writer(info_csv, delimiter='\t')
+            genotypeWriter = csv.writer(genotype_csv, delimiter=',')
+            geneWriter = csv.writer(gene_csv, delimiter=',')
+            chromosomeWriter = csv.writer(chromosome_csv, delimiter=',')
+    
+            # ---- relazioni
+            ofSpeciesWriter = csv.writer(of_species_csv, delimiter=',')
+            containsWriter = csv.writer(contains_csv, delimiter=',')
+            supportedByWriter = csv.writer(supported_by_csv, delimiter='\t')
+            forVariantWriter = csv.writer(for_variant_csv, delimiter=',')
+            inVariantWriter = csv.writer(in_variant_csv, delimiter=',')
+            hasVariantWriter = csv.writer(has_variant_csv, delimiter=',')
+            inChromosomeWriter = csv.writer(in_chromosome_csv, delimiter=',')
+
+            # Scrivo gli header nei rispettivi file
+        
+            # ---- nodi
+            variantWriter.writerow(variant_header)
+            genotypeWriter.writerow(genotype_header)
+            infoWriter.writerow(info_header)
+            geneWriter.writerow(gene_header)
+            chromosomeWriter.writerow(chromosome_header)    
+        
+            # ---- relazioni
             supportedByWriter.writerow(supported_by_header)
+            containsWriter.writerow(contains_header)
+            ofSpeciesWriter.writerow(of_species_header)
+            forVariantWriter.writerow(for_variant_header)
+            inVariantWriter.writerow(in_variant_header)
+            hasVariantWriter.writerow(has_variant_header)
+            inChromosomeWriter.writerow(in_chromosome_header)
+            
+            # session = driver.session()
+            # session.run(" ".join([
+            #         "USING PERIODIC COMMIT 15000",
+            #         "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by.csv' as line",
+            #         "MERGE (i:Info {info_id: line.info_id}) WITH line, i",
+            #         "MERGE (g:Genotype {sample: line.sample}) WITH line, i, g",
+            #         "CREATE (i)-[s:Supported_By]->(g) SET s += line"
+            #     ]))
+            # session.close()    
+
+            # supported_by_csv = open(temp_folder + temp_token + '_supported_by.csv', 'w')
+            # supportedByWriter = csv.writer(supported_by_csv, delimiter=',') #Riapro il writer
+            # supportedByWriter.writerow(supported_by_header)
 
 
     for item in list(genes):
@@ -373,104 +521,8 @@ def main(argv):
     })
 
     
-    queries = [
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder + temp_token + "_variant.csv' as line",
-            "MERGE (v:Variant {variant_id: line.variant_id})",
-            "ON CREATE SET v += line"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_info.csv' as line",
-            "MERGE (i:Info {info_id: line.info_id}) ON CREATE SET i += line ON MATCH SET i += line"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_genotype.csv' as line",
-            "MERGE (g:Genotype {sample: line.sample})"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_gene.csv' as line",
-            "MERGE (g:Gene {gene_id: line.gene_id})"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_chromosome.csv' as line",
-            "MERGE (c:Chromosome {chromosome: line.chromosome})"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_contains.csv' as line",
-            "MATCH (f:File) WHERE f.name = line.name WITH line, f",
-            "MATCH(i:Info) WHERE i.info_id = line.info_id",
-            "CREATE (f)-[:Contains]->(i)"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_for_variant.csv' as line",
-            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
-            "MATCH(i:Info) WHERE i.info_id = line.info_id",
-            "CREATE (i)-[f:For_Variant]->(v) SET f += line"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_of_species.csv' as line",
-            "MATCH(s:Species) WHERE s.species = line.species WITH line, s",
-            "MATCH(g:Genotype) WHERE g.sample= line.sample",
-            "CREATE (g)-[:Of_Species]->(s)"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_in_variant.csv' as line",
-            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
-            "MATCH(g:Gene) WHERE g.gene_id = line.gene_id",
-            "CREATE (g)-[:In_Variant]->(v)"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_has_variant.csv' as line",
-            "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
-            "MATCH(c:Chromosome) WHERE c.chromosome = line.chromosome",
-            "CREATE (c)-[:Has_Variant]->(v)"
-        ],
-        [
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_in_chromosome.csv' as line",
-            "MATCH(g:Gene) WHERE g.gene_id = line.gene_id WITH line, g",
-            "MATCH(c:Chromosome) WHERE c.chromosome = line.chromosome",
-            "MERGE (g)-[:In_Chromosome]->(c)"
-        ]
-    ]
-
     
-    for query in queries:
-        session.run( " ".join(query) )
-
-
-    #for part in range(part_count + 1):
-    #    session.run(" ".join([
-    #        "USING PERIODIC COMMIT 15000",
-    #        "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by_" +  str(part) + ".csv' as line",
-    #        "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
-    #        "MATCH(g:Genotype) WHERE g.sample= line.sample",
-    #        "CREATE (i)-[s:Supported_By]->(g) SET s += line"
-    #        ])
-    #    )
-    
-    session.run(" ".join([
-            "USING PERIODIC COMMIT 15000",
-            "LOAD CSV WITH HEADERS from 'File:///" + temp_folder +  temp_token + "_supported_by.csv' as line",
-            "MATCH(i:Info) WHERE i.info_id = line.info_id WITH line, i",
-            "MATCH(g:Genotype) WHERE g.sample= line.sample",
-            "CREATE (i)-[s:Supported_By]->(g) SET s += line"
-            ])
-        )
-
-    # Chiudo la sessione di Neo4j e termino
-    session.close()
-    
+    populateDB(driver, temp_folder + temp_token)
 
     # os.remove(input_file)
     os.remove(temp_folder + temp_token + '_variant.csv')

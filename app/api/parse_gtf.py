@@ -1,4 +1,5 @@
 # !/usr/bin/env python   # Script python per il parsing di file in formato GTF da inserire in Neo4j
+# -*- coding: utf-8 -*-
 
 import uuid
 import sys
@@ -10,7 +11,8 @@ import GTF
 import glob
 from neo4j.v1 import GraphDatabase, basic_auth
 
-# Queries per il popolamento del database per il file vcf
+
+# Queries per il popolamento del database per il file gtf
 queries = [
     [
         "USING PERIODIC COMMIT 15000",
@@ -91,7 +93,8 @@ def populateDB(driver, token):
 
 
 def main(argv):
-     # Ottengo la stringa relativa al file da processare
+    
+    # Ottengo la stringa relativa al file da processare
     input_file = argv[0]
     temp_folder = argv[1]
     username =  argv[2]
@@ -198,7 +201,6 @@ def main(argv):
     session.close()
 
 
-    # Versione che salva le righe del file in GraphDB
     print 'Parsing file...'
 
     # inizializzo un contatore per fare un load parziale del file su database per file troppo grandi

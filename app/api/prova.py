@@ -226,21 +226,24 @@ def main(argv):
     # Creo un nodo corrispondente al file
     properties = {
         "name": os.path.basename(file.name),
-        "extension": os.path.splitext(input_file)[1],
-        "total": 0,
-        "hom": 0,
-        "het": 0,
-        "hom_alt": 0,
-        "uncalled": 0,
-        "snp": 0,
-        "indels": 0,
-        "unknown": 0,
-        "in_dbSNP": 0,
-        "not_in_dbSNP": 0,
-        "in_1000g": 0,
-        "not_in_1000g": 0
+        "extension": os.path.splitext(input_file)[1]
     }
-   
+    
+    statistics = {
+            "total": 0,
+            "hom": 0,
+            "het": 0,
+            "hom_alt": 0,
+            "uncalled": 0,
+            "snp": 0,
+            "indels": 0,
+            "unknown": 0,
+            "in_dbSNP": 0,
+            "not_in_dbSNP": 0,
+            "in_1000g": 0,
+            "not_in_1000g": 0
+    }
+
     # inizializzo un contatore per fare un load parziale del file su database per file troppo grandi
     row_count = 0 
 
@@ -271,23 +274,23 @@ def main(argv):
 
         
         # Aggiorno le statistiche sul file
-        properties["total"] += 1
-        properties["hom"] += record.num_hom_ref
-        properties["het"] += record.num_het
-        properties["hom_alt"] += record.num_hom_alt
-        properties["uncalled"] += record.num_unknown
+        statistics["total"] += 1
+        statistics["hom"] += record.num_hom_ref
+        statistics["het"] += record.num_het
+        statistics["hom_alt"] += record.num_hom_alt
+        statistics["uncalled"] += record.num_unknown
 
         if variant["MUTATION"] == 'snp':
-            properties["snp"] += 1
+            statistics["snp"] += 1
         elif variant["MUTATION"]== 'indel':
-            properties["indels"] += 1
+            statistics["indels"] += 1
         else:
-            properties["unknown"] += 1
+            statistics["unknown"] += 1
 
         # Costruisco la stringa della lista degli attributi delle annotazioni (sono costretto a farlo perchè non ho un modo univoco per sapere a priori i campi presenti)
         annotation = {
             "info_id": uuid.uuid4(),
-            "attributes": ""
+            "attributes": {}
         }
 
 
@@ -299,21 +302,25 @@ def main(argv):
                 variant["dbSNP"] = ";".join(str(v) for v in value) if isinstance(value,list) else value
 
                 if variant["dbSNP"] == 'None':
-                    properties['not_in_dbSNP'] += 1
+                    statistics['not_in_dbSNP'] += 1
                 else:
-                    properties['in_dbSNP'] += 1
+                    statistics['in_dbSNP'] += 1
             
             if re.match('1000g(\w*)_all', key):
                 if value:
-                    properties['in_1000g'] += 1
+                    statistics['in_1000g'] += 1
                 else:
-                    properties['not_in_1000g'] += 1
+                    statistics['not_in_1000g'] += 1
                 
 
-            annotation["attributes"] += key + "=" + ( ";".join(str(v) for v in value) if isinstance(value,list) else str(value) ) + ","
+            #annotation["attributes"] += key + "=" + ( ";".join(str(v) for v in value) if isinstance(value,list) else str(value) ) + ","
+            annotation["attributes"][key] = value[0] if isinstance(value,list) and len(value) == 1 else value
         
         # rimuovo la virgola in eccesso alla fine della stringa di attributi
-        annotation["attributes"] = annotation["attributes"].rstrip(',')
+        #annotation["attributes"] = annotation["attributes"].rstrip(',')
+        
+        # trasformo il dictionary ottenuto in formato json (serve per neomodel)
+        annotation["attributes"] = json.dumps(annotation["attributes"])
 
         info_row = []
 
@@ -334,16 +341,19 @@ def main(argv):
                 "sample": sample.sample,
                 "phased": sample.phased,
                 "state" : sample.gt_type or 'None',
-                "attributes": ""
+                "attributes": {}
             }
 
             for i in range(len(format_vars)): 
                 #attributes = attributes + format_vars[i] + ': {' + format_vars[i] + '}, ' 
-                genotype["attributes"] += format_vars[i] + "=" + (";".join(str(v) for v in sample.data[i]) if isinstance(sample.data[i],list) else str(sample.data[i]) ) + ","
+                #genotype["attributes"] += format_vars[i] + "=" + (";".join(str(v) for v in sample.data[i]) if isinstance(sample.data[i],list) else str(sample.data[i]) ) + ","
+                genotype["attributes"][format_vars[i]] = sample.data[i][0] if isinstance(sample.data[i],list) and len(sample.data[i]) == 1 else sample.data[i]
 
-            genotype["attributes"] = genotype["attributes"].rstrip(',')
+            #genotype["attributes"] = genotype["attributes"].rstrip(',')
 
-            supported_by_row = [  ]
+            genotype["attributes"] = json.dumps(genotype["attributes"])
+
+            supported_by_row = []
 
             for item in supported_by_header:
                 if item == "info_id":
@@ -374,11 +384,12 @@ def main(argv):
         chromosomes.add(record.CHROM)
         hasVariantWriter.writerow([ record.CHROM, variant["variant_id"] ])
 
-        for g in record.INFO['Gene.refGene']:
-            if not (g == 'NONE'):
-                genes.add(g)
-                inChromosomeWriter.writerow([ g, record.CHROM ])
-                inVariantWriter.writerow([ g, variant["variant_id"] ])
+        if record.INFO.has_key('Gene.refGene'):
+            for g in record.INFO['Gene.refGene']:
+                if not (g == 'NONE'):
+                    genes.add(g)
+                    inChromosomeWriter.writerow([ g, record.CHROM ])
+                    inVariantWriter.writerow([ g, variant["variant_id"] ])
                 
 
 
@@ -498,6 +509,7 @@ def main(argv):
     has_variant_csv.close()
     in_chromosome_csv.close()
     
+
      # Versione che salva le righe del file in Neo4j
     print 'Populating Database...'
     session = driver.session()
@@ -506,7 +518,7 @@ def main(argv):
        "MERGE (u:User { username:{username} })",
        "MERGE (e:Experiment { name:{experiment} })",
        "MERGE (s:Species {species: {species} })",
-       "MERGE (f:File { name:{properties}.name }) ON CREATE SET f += {properties}",
+       "MERGE (f:File { name:{properties}.name }) ON CREATE SET f.extension = {properties}.extension, f.statistics =  {statistics}",
        "MERGE (u)-[:Created]->(e)",
        "MERGE (e)-[:For_Species]->(s)",
        "MERGE (e)-[:Composed_By]->(f)"
@@ -517,7 +529,8 @@ def main(argv):
         "username": username,
         "experiment": experiment,
         "species": species,
-        "properties": properties
+        "properties": properties,
+        "statistics": json.dumps(statistics)
     })
 
     

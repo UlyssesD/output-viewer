@@ -9,6 +9,9 @@ import json
 import vcf
 import csv
 import glob
+import datetime
+import strconv
+
 from neo4j.v1 import GraphDatabase, basic_auth
 
 
@@ -90,6 +93,38 @@ queries = [
             "CREATE (i)-[s:Supported_By]->(g) SET s += line"
         ]
     ]
+
+def inferType(key, value):
+
+    if isinstance(value,list):
+        res = []
+        
+        for v in value:
+            inferred = strconv.infer(v)
+            #print 'List - ', key, ': ', inferred
+            if (inferred is None) or re.match('^date', inferred):
+                res.append(v)
+            else:
+                res.append(strconv.convert(v))
+
+        #print key, ' result: ', [type(r) for r in res]
+        
+        res = res[0] if len(res) == 1 else res
+
+    else:
+        inferred = strconv.infer(value)
+
+        #print 'Single - ', key, ': ', inferred
+
+        if (inferred is None) or re.match('^date', inferred):
+            res = value
+        else:
+            res = strconv.convert(value)
+
+        #print key, ' result: ', type(res)
+
+    return res
+
 
 def populateDB(driver, token):
 
@@ -314,8 +349,15 @@ def main(argv):
                 
 
             #annotation["attributes"] += key + "=" + ( ";".join(str(v) for v in value) if isinstance(value,list) else str(value) ) + ","
-            annotation["attributes"][key] = value[0] if isinstance(value,list) and len(value) == 1 else value
-        
+            #annotation["attributes"][key] = value[0] if isinstance(value,list) and len(value) == 1 else value
+            annotation["attributes"][key] = inferType(key, value)
+            #if isinstance(value, list):
+            #    for v in value:
+            #        inferType(key, v)
+            #else:
+            #    inferType(key, value)
+
+
         # rimuovo la virgola in eccesso alla fine della stringa di attributi
         #annotation["attributes"] = annotation["attributes"].rstrip(',')
         
@@ -347,7 +389,8 @@ def main(argv):
             for i in range(len(format_vars)): 
                 #attributes = attributes + format_vars[i] + ': {' + format_vars[i] + '}, ' 
                 #genotype["attributes"] += format_vars[i] + "=" + (";".join(str(v) for v in sample.data[i]) if isinstance(sample.data[i],list) else str(sample.data[i]) ) + ","
-                genotype["attributes"][format_vars[i]] = sample.data[i][0] if isinstance(sample.data[i],list) and len(sample.data[i]) == 1 else sample.data[i]
+                #genotype["attributes"][format_vars[i]] = sample.data[i][0] if isinstance(sample.data[i],list) and len(sample.data[i]) == 1 else sample.data[i]
+                genotype["attributes"][format_vars[i]] = inferType(format_vars[i], sample.data[i])
 
             #genotype["attributes"] = genotype["attributes"].rstrip(',')
 

@@ -22,7 +22,7 @@ class FileStatisticsController {
             console.log(data);
             self.data = data;
 
-        }).catch(function () { console.log('Some error occurred') });
+        }).catch(function (error) { console.log(error) });
 
         self.processDataForVisualization = function (data) {
             self.data = data;

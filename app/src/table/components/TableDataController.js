@@ -45,7 +45,7 @@ class TableDataController {
         self.processDataForVisualization = function(data) {
             self.data = data;
 
-            self.template = self.config.row.join("\n");
+            //self.template = self.config.row.join("\n");
 
 
 /*

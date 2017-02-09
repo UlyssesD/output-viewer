@@ -20,6 +20,10 @@ class TableDataService {
         self.loadVariantsFromQuery = function(query) {
             console.log('Retrieving data for selected query...');
 
+            return $http.get("http://localhost:8000/dataService/" + query.username + "/" + "testExp" + "/" + query.file + "/details/?page=" + query.page + "&limit=" + query.limit)
+            .then(self.variantRetrieved);
+
+/*
             return $http({
                 method: 'POST',
                 url: 'http://' + config.neo4j.address + ':' + config.neo4j.port + '/db/data/transaction/commit',
@@ -52,6 +56,8 @@ class TableDataService {
                     ]
                 }
             }).then(self.variantRetrieved);
+            */
+
         };
 
         // Metodo chiamato una volta ottenute le varianti dal database. Riorganizzo i dati prima di passarli alla vista
@@ -59,6 +65,7 @@ class TableDataService {
             console.log('Data successfully retrieved');
             console.log(response);
 
+/*
             var data = {
                 count: 0,
                 elements: []
@@ -74,8 +81,9 @@ class TableDataService {
                     genotypes: response.data.results[0].data[idx].row[0].genotypes
                 })
             }
+*/
 
-            return data;
+            return response.data;
         }
     }
 

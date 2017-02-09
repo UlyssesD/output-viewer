@@ -96,12 +96,18 @@ queries = [
 
 def inferType(key, value):
 
+
     if isinstance(value,list):
         res = []
         
         for v in value:
+
+            if type(v) is str:
+                v = v.decode('string_escape')
+
             inferred = strconv.infer(v)
             #print 'List - ', key, ': ', inferred
+
             if (inferred is None) or re.match('^date', inferred):
                 res.append(v)
             else:
@@ -112,8 +118,11 @@ def inferType(key, value):
         res = res[0] if len(res) == 1 else res
 
     else:
-        inferred = strconv.infer(value)
 
+        if type(value) is str:
+            value = value.decode('string_escape')
+
+        inferred = strconv.infer(value)
         #print 'Single - ', key, ': ', inferred
 
         if (inferred is None) or re.match('^date', inferred):
@@ -189,7 +198,7 @@ def main(argv):
     # Apro il file vcf
     print 'Opening .vcf file...'
     file = open(input_file, 'r')
-    reader = vcf.VCFReader(file)
+    reader = vcf.Reader(file, encoding='utf-8')
 
 
     # Costruisco gli header dei file
@@ -203,7 +212,7 @@ def main(argv):
 
     # ---- relazioni
     contains_header = ["name", "info_id"]
-    for_variant_header = ["info_id", "variant_id", "START", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "dbSNP"]
+    for_variant_header = ["info_id", "variant_id", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "dbSNP"]
     of_species_header = ["sample", "species"]
     in_variant_header = ["gene_id", "variant_id"]
     has_variant_header = ["chromosome", "variant_id"]
@@ -292,15 +301,15 @@ def main(argv):
 
             "CHROM": record.CHROM,
             "POS": record.POS,
-            "START": record.start,
+            #"START": record.start,
             "END": record.end,
             "ID": record.ID or '.',
             "REF": record.REF,
             "ALT": ";".join(str(v) for v in record.ALT) if isinstance(record.ALT,list) else record.ALT,
-            "AFFECTED_START": record.affected_start,
-            "AFFECTED_END": record.affected_end,
+            #"AFFECTED_START": record.affected_start,
+            #"AFFECTED_END": record.affected_end,
             "QUAL": record.QUAL,
-            "FILTER": record.FILTER or '.',
+            "FILTER": record.FILTER or 'PASS',
             "FORMAT": record.FORMAT or '.',
             "HETEROZIGOSITY": record.heterozygosity,
             "MUTATION": record.var_type,
@@ -360,7 +369,7 @@ def main(argv):
 
         # rimuovo la virgola in eccesso alla fine della stringa di attributi
         #annotation["attributes"] = annotation["attributes"].rstrip(',')
-        
+
         # trasformo il dictionary ottenuto in formato json (serve per neomodel)
         annotation["attributes"] = json.dumps(annotation["attributes"])
 

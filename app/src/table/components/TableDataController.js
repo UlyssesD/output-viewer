@@ -23,6 +23,14 @@ class TableDataController {
             'skip': 0
         };
 
+        self.filters = [];
+
+        $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + "testExp" + "/" + self.query.file + "/filters/")
+        .then(function(response) {
+            console.log("FILTERS RETRIEVED");
+            self.filters = response.data;
+            console.log(self.filters)
+        })
 
         console.log($routeParams);
 
@@ -66,6 +74,10 @@ class TableDataController {
             console.log(self.displayed_samples);
         };
 
+        self.filterTable = function () {
+            console.log("FILTER SUBMISSION TO SERVER");
+            console.log(self.filters);
+        }
         // Metodo chiamato per visualizzare le annotazioni di una particolare variante
         self.showAnnotations = function ($event, selected) {
 

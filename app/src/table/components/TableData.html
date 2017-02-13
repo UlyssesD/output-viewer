@@ -17,3 +17,33 @@
     <md-table-pagination md-boundary-links md-limit="$ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="$ctrl.query.page"
         md-total="{{$ctrl.data.count}}" md-on-paginate="$ctrl.getElems" md-page-select ></md-table-pagination>
 </md-card>
+
+<form name="filterTable">
+<md-list>
+    <md-list-item ng-repeat="el in $ctrl.filters.list" ng-switch="el.type">
+            
+            <span ng-switch-when="numeric">
+                <md-input-container>
+                    <input ng-model="el.min" type="number">
+                </md-input-container>
+                <md-label> &le; {{el.label}} &le; </md-label>
+                <md-input-container>
+                <input ng-model="el.max" type="number">
+                </md-input-container>
+            </span>
+
+
+            <md-input-container ng-switch-when="string">
+                <label>{{el.label}}</label>
+                <input ng-model="el.value" md-maxlength="20" type="text">
+            </md-input-container>
+            
+            <md-input-container ng-switch-when="boolean">
+                <md-checkbox ng-model="el.value" aria-label=">el.label">{{ el.label }}</md-checkbox>
+            </md-input-container>
+    </md-list-item>
+</md-list>
+    <div>
+        <md-button class="md-raised md-primary" ng-click="$ctrl.filterTable()">Submit</md-button>
+    </div>
+</form>

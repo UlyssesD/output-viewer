@@ -26,7 +26,7 @@ queries = [
         [
             "USING PERIODIC COMMIT 15000",
             "LOAD CSV WITH HEADERS from 'File:///{token}_info.csv' as line FIELDTERMINATOR '\t'",
-            "MERGE (i:Info {info_id: line.info_id}) ON CREATE SET i += line ON MATCH SET i += line"
+            "CREATE (i:Info {info_id: line.info_id}) SET i += line"
         ],
         [
             "USING PERIODIC COMMIT 15000",
@@ -46,8 +46,7 @@ queries = [
         [
             "USING PERIODIC COMMIT 15000",
             "LOAD CSV WITH HEADERS from 'File:///{token}_contains.csv' as line",
-            "MATCH (f:File) WHERE f.name = line.name WITH line, f",
-            "MATCH(i:Info) WHERE i.info_id = line.info_id",
+            "MATCH (f:File), (i:Info) WHERE f.name = line.name AND i.info_id = line.info_id",
             "CREATE (f)-[:Contains]->(i)"
         ],
         [
@@ -136,6 +135,7 @@ def inferType(key, value):
 
 
 def populateDB(driver, token):
+    print 'Populating Database...'
 
     for query in queries:
         session = driver.session()
@@ -206,7 +206,7 @@ def main(argv):
     # ---- nodi
     variant_header = ["variant_id", "CHROM", "POS", "REF", "ALT", "MUTATION"]
     genotype_header = ["sample"]
-    info_header = ["info_id", "attributes"]
+    info_header = ["info_id", "DP", "Gene_refGene", "Func_refGene", "QD", "SIFT_score", "otg_all", "NM", "LM", "FS", "MQ0", "attributes"]
     gene_header = ["gene_id"]
     chromosome_header = ["chromosome"]
 
@@ -288,6 +288,29 @@ def main(argv):
             "not_in_1000g": 0
     }
 
+    # ---- comincio creando i primi nodi di riferimento
+    session = driver.session()
+
+    prova = [
+       "MERGE (u:User { username:{username} })",
+       "MERGE (e:Experiment { name:{experiment} })",
+       "MERGE (s:Species {species: {species} })",
+       "CREATE (f:File { name:{properties}.name }) SET f.extension = {properties}.extension",
+       "MERGE (u)-[:Created]->(e)",
+       "MERGE (e)-[:For_Species]->(s)",
+       "MERGE (e)-[:Composed_By]->(f)"
+    ]
+
+    # Associo il file all'utente
+    session.run(" ".join(prova), {
+        "username": username,
+        "experiment": experiment,
+        "species": species,
+        "properties": properties
+    })
+
+    session.close()
+
     # inizializzo un contatore per fare un load parziale del file su database per file troppo grandi
     row_count = 0 
 
@@ -331,12 +354,22 @@ def main(argv):
         else:
             statistics["unknown"] += 1
 
+
         # Costruisco la stringa della lista degli attributi delle annotazioni (sono costretto a farlo perchè non ho un modo univoco per sapere a priori i campi presenti)
         annotation = {
             "info_id": uuid.uuid4(),
+            "DP": "",
+            "Gene.refGene": "",
+            "Func.refgene": "",
+            "otg_all": "",
+            "QD": "",
+            "NM": "",
+            "LM": "",
+            "FS": "",
+            "MQ0": "",
+            "SIFT_score": "",
             "attributes": {}
         }
-
 
 
         for (key, value) in record.INFO.items():
@@ -344,14 +377,17 @@ def main(argv):
             if re.match('(\w*)snp(\w*)', key):
                 
                 variant["dbSNP"] = ";".join(str(v) for v in value) if isinstance(value,list) else value
-
+                variant["ID"] = ";".join(str(v) for v in value) if isinstance(value,list) else value
+                
                 if variant["dbSNP"] == 'None':
                     statistics['not_in_dbSNP'] += 1
                 else:
                     statistics['in_dbSNP'] += 1
             
             if re.match('1000g(\w*)_all', key):
+                
                 if value:
+                    annotation['otg_all'] = value
                     statistics['in_1000g'] += 1
                 else:
                     statistics['not_in_1000g'] += 1
@@ -359,7 +395,13 @@ def main(argv):
 
             #annotation["attributes"] += key + "=" + ( ";".join(str(v) for v in value) if isinstance(value,list) else str(value) ) + ","
             #annotation["attributes"][key] = value[0] if isinstance(value,list) and len(value) == 1 else value
-            annotation["attributes"][key] = inferType(key, value)
+            if key.replace(".", "_") in info_header:
+                if key == "LM":
+                    annotation[key] = inferType(key, value[0].split('_'))
+                else:
+                    annotation[key] = inferType(key, value)
+            else:
+                annotation["attributes"][key] = inferType(key, value)
             #if isinstance(value, list):
             #    for v in value:
             #        inferType(key, v)
@@ -391,9 +433,20 @@ def main(argv):
             genotype = {
                 "sample": sample.sample,
                 "phased": sample.phased,
-                "state" : sample.gt_type or 'None',
+                #"state" : sample.gt_type or 'None',
                 "attributes": {}
             }
+
+            if not sample.gt_type:
+                genotype["state"] = "None"
+            elif sample.gt_type == 0:
+                genotype["state"] = "hom_ref"
+            elif sample.gt_type == 1:
+                genotype["state"] = "hom_alt"
+            elif sample.gt_type == 2:
+                genotype["state"] = "het"
+
+                
 
             for i in range(len(format_vars)): 
                 #attributes = attributes + format_vars[i] + ': {' + format_vars[i] + '}, ' 
@@ -444,10 +497,23 @@ def main(argv):
                     inVariantWriter.writerow([ g, variant["variant_id"] ])
                 
 
-
+        sys.stdout.write("%d lines scanned %s"%(row_count,"\r"))
+        sys.stdout.flush();
 
         if not (row_count % 15000):
-            print str(row_count) + " scanned"
+
+            print ""
+
+            for item in list(genes):
+                geneWriter.writerow([ item ])
+        
+            for item in list(chromosomes):
+                chromosomeWriter.writerow([ item ])
+        
+
+            for item in list(genotypes):
+                genotypeWriter.writerow( [ item ] )
+                ofSpeciesWriter.writerow( [ item, species ] )
             
             variant_csv.close()
             info_csv.close()
@@ -532,6 +598,7 @@ def main(argv):
             # supportedByWriter = csv.writer(supported_by_csv, delimiter=',') #Riapro il writer
             # supportedByWriter.writerow(supported_by_header)
 
+    print ""
 
     for item in list(genes):
         geneWriter.writerow([ item ])
@@ -562,18 +629,12 @@ def main(argv):
     in_chromosome_csv.close()
     
 
-     # Versione che salva le righe del file in Neo4j
-    print 'Populating Database...'
+    
     session = driver.session()
 
     prova = [
-       "MERGE (u:User { username:{username} })",
-       "MERGE (e:Experiment { name:{experiment} })",
-       "MERGE (s:Species {species: {species} })",
-       "MERGE (f:File { name:{properties}.name }) ON CREATE SET f.extension = {properties}.extension, f.statistics =  {statistics}",
-       "MERGE (u)-[:Created]->(e)",
-       "MERGE (e)-[:For_Species]->(s)",
-       "MERGE (e)-[:Composed_By]->(f)"
+       "MATCH (u:User { username: {username} })-[:Created]->(e:Experiment { name:{experiment} })-[:Composed_By]->(f:File { name:{properties}.name })",
+       "SET f.statistics =  {statistics}"
     ]
 
     # Associo il file all'utente
@@ -585,6 +646,7 @@ def main(argv):
         "statistics": json.dumps(statistics)
     })
 
+    session.close()
     
     
     populateDB(driver, temp_folder + temp_token)

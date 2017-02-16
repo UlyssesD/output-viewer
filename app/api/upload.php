@@ -12,6 +12,6 @@
 
   move_uploaded_file( $_FILES['file']['tmp_name'] , $destination );
 
-  exec('python prova.py ' . $destination . ' '. $tempFolder . ' ' .  $username . ' ' . $experiment . ' ' . $species, $out);
+  exec('python parse_vcf.py ' . $destination . ' '. $tempFolder . ' ' .  $username . ' ' . $experiment . ' ' . $species, $out);
 ?>
 

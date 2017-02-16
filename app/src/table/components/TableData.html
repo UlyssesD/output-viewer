@@ -18,7 +18,12 @@
         md-total="{{$ctrl.data.count}}" md-on-paginate="$ctrl.getElems" md-page-select ></md-table-pagination>
 </md-card>
 
-<form name="filterTable">
+<section ng-show="$ctrl.filters == null" layout-padding>
+    <p> Loading filters...</p>
+    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+</section>
+
+<form name="filterTable" ng-show="$ctrl.filters != null" layout-padding>
 <md-list>
     <md-list-item ng-repeat="el in $ctrl.filters.list" ng-switch="el.type">
             

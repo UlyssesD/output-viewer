@@ -20,17 +20,12 @@ class TableDataController {
             'file': $routeParams.filename,
             'limit': 5,
             'page': 1,
-            'skip': 0
+            'skip': 0,
+            'filters': null
         };
 
-        self.filters = [];
+        self.filters = null;
 
-        $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + "testExp" + "/" + self.query.file + "/filters/")
-        .then(function(response) {
-            console.log("FILTERS RETRIEVED");
-            self.filters = response.data;
-            console.log(self.filters)
-        })
 
         console.log($routeParams);
 
@@ -54,7 +49,13 @@ class TableDataController {
             self.data = data;
 
             //self.template = self.config.row.join("\n");
-
+            if (self.filters == null)
+                $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + "testExp" + "/" + self.query.file + "/filters/")
+                .then(function(response) {
+                    console.log("FILTERS RETRIEVED");
+                    self.filters = response.data;
+                    console.log(self.filters)
+                })
 
 /*
             for( var i = 0; i < data.variants.length; i++) {
@@ -76,7 +77,12 @@ class TableDataController {
 
         self.filterTable = function () {
             console.log("FILTER SUBMISSION TO SERVER");
-            console.log(self.filters);
+            self.query.filters = self.filters
+
+            self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
+                self.processDataForVisualization(data);
+            }).catch(function () { console.log('Some error occurred') });
+
         }
         // Metodo chiamato per visualizzare le annotazioni di una particolare variante
         self.showAnnotations = function ($event, selected) {

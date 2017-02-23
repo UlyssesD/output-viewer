@@ -19,7 +19,7 @@ class FileStatisticsService {
         self.loadFileStatistics = function (query) {
             console.log('Load file informations for ' + query.file.split('.vcf')[0] + '...')
 
-        return $http.get("http://localhost:8000/dataService/" + "lola" + "/" + "myExp" + "/" + query.file + "/statistics/")
+        return $http.get("http://localhost:8000/dataService/" + "lola" + "/" + query.experiment + "/" + query.file + "/statistics/")
             .then(self.statisticsRetrieved);
         
 /* 

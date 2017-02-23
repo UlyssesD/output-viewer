@@ -31,10 +31,10 @@ class FileExplorerService {
                 data: {
                     "statements": [
                         {
-                            "statement": "MATCH (u:User { username:{username} })-[:Created]->(e:Experiment)-[:Composed_By]->(f:File) RETURN {name: f.name}",
+                            "statement": "MATCH (u:User { username:{username} })-[:Created]->(e:Experiment {name: {experiment} })-[:Composed_By]->(f:File) RETURN {name: f.name}",
                             "parameters": {
                                 "username": query.username,
-                                "experiment": "MyExp"
+                                "experiment": query.experiment
                             }
                         }
                     ]

@@ -13,6 +13,7 @@ class FileStatisticsController {
         self.config = config;
 
         self.query = {
+            'experiment': $routeParams.experiment,
             'file': $routeParams.filename
         }
 

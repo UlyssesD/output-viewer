@@ -44,7 +44,7 @@ export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMessa
     .when("/myFiles", {
       templateUrl: "pages/myFiles.htm" 
     })
-    .when("/details/:filename", {
+    .when("/details/:experiment/:filename", {
       templateUrl: "pages/fileDetails.htm"
     })
     .otherwise({

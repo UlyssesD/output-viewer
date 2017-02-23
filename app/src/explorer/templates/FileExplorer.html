@@ -1,7 +1,21 @@
 <section layout="row">
+    <md-input-container flex md-padding>
+  <md-select ng-model="$ctrl.query.experiment" ng-change="$ctrl.show()">
+    <md-select-header>
+      <span> Experiments - </span>
+    </md-select-header>
+    <md-option ng-value="exp.name" ng-repeat="exp in $ctrl.experiments.rows">{{ exp.name }}</md-option>
+  </md-select>
+</md-input-container>
+</section>
+
+<section layout="row" ng-show="$ctrl.query.experiment == null" flex layout-padding>
+    <p> Please select an experiment to show the list of file contained </p>
+</section>
+<section layout="row" ng-show="$ctrl.query.experiment != null">
         <md-list flex  layout-padding>
             <ng-repeat ng-repeat="el in $ctrl.data.elements track by $index">
-                <md-list-item href="#details/{{el.name}}" flex aria-label="{{el.name}}" class="md-whiteframe-4dp" md-colors="{background: 'background-A100'}">
+                <md-list-item href="#details/{{$ctrl.query.experiment}}/{{el.name}}" flex aria-label="{{el.name}}" class="md-whiteframe-4dp" md-colors="{background: 'background-A100'}">
                     <p>{{el.name}}</p>
                     </div>
                 </md-list-item>

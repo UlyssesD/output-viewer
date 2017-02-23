@@ -17,6 +17,7 @@ class TableDataController {
 
         self.query = {
             'username': 'lola',
+            'experiment': $routeParams.experiment,
             'file': $routeParams.filename,
             'limit': 5,
             'page': 1,
@@ -31,7 +32,7 @@ class TableDataController {
 
         self.config = config;
 
-        $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + "myExp" + "/" + self.query.file + "/filters/")
+        $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + self.query.experiment + "/" + self.query.file + "/filters/")
             .then(function(response) {
                 console.log("FILTERS RETRIEVED");
                 self.filters = response.data;

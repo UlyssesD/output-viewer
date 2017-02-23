@@ -15,18 +15,22 @@ import strconv
 from neo4j.v1 import GraphDatabase, basic_auth
 
 
+
 # Queries per il popolamento del database per il file vcf
 queries = [
         [
             "USING PERIODIC COMMIT 15000",
             "LOAD CSV WITH HEADERS from 'File:///{token}_variant.csv' as line",
             "MERGE (v:Variant {variant_id: line.variant_id})",
-            "ON CREATE SET v += line"
+            "ON CREATE SET v += {CHROM: line.CHROM, POS: toInt(line.POS), REF: line.REF, ALT: split(line.ALT,';'), MUTATION: line.MUTATION}"
         ],
         [
             "USING PERIODIC COMMIT 15000",
             "LOAD CSV WITH HEADERS from 'File:///{token}_info.csv' as line FIELDTERMINATOR '\t'",
-            "CREATE (i:Info {info_id: line.info_id}) SET i += line"
+            "CREATE (i:Info {info_id: line.info_id, DP: toInt(line.DP), Gene_refGene: split(line.Gene_refGene, ';'), Func_refGene: split(line.Func_refGene, ';'), QD: toFloat(line.QD),",
+            "SIFT_score: toFloat(line.SIFT_score), otg_all: toFloat(line.otg_all), NM: toInt(line.NM), LM: split(line.LM,';'), FS: toFloat(line.FS), MQ0: toFloat(line.MQ0), attributes: line.attributes,",
+            "END: toInt(line.END), ID: line.ID, QUAL: toFloat(line.QUAL), FILTER: line.FILTER, FORMAT: line.FORMAT,",
+            "HETEROZIGOSITY: toFloat(line.HETEROZIGOSITY), dbSNP: line.dbSNP})"
         ],
         [
             "USING PERIODIC COMMIT 15000",
@@ -54,7 +58,7 @@ queries = [
             "LOAD CSV WITH HEADERS from 'File:///{token}_for_variant.csv' as line",
             "MATCH(v:Variant) WHERE v.variant_id = line.variant_id WITH line, v",
             "MATCH(i:Info) WHERE i.info_id = line.info_id",
-            "CREATE (i)-[f:For_Variant]->(v) SET f += line"
+            "CREATE (i)-[f:For_Variant]->(v)"
         ],
         [
             "USING PERIODIC COMMIT 15000",
@@ -102,24 +106,24 @@ def inferType(key, value):
         for v in value:
 
             if type(v) is str:
-                v = v.decode('string_escape')
+                v = str(v.decode('string_escape'))
 
             inferred = strconv.infer(v)
             #print 'List - ', key, ': ', inferred
 
             if (inferred is None) or re.match('^date', inferred):
-                res.append(v)
+                res.append(str(v))
             else:
-                res.append(strconv.convert(v))
+                res.append(str(strconv.convert(v)))
 
         #print key, ' result: ', [type(r) for r in res]
         
-        res = res[0] if len(res) == 1 else res
+        res = res[0] if len(res) == 1 else ";".join(res)
 
     else:
 
         if type(value) is str:
-            value = value.decode('string_escape')
+            value = str(value.decode('string_escape'))
 
         inferred = strconv.infer(value)
         #print 'Single - ', key, ': ', inferred
@@ -206,13 +210,13 @@ def main(argv):
     # ---- nodi
     variant_header = ["variant_id", "CHROM", "POS", "REF", "ALT", "MUTATION"]
     genotype_header = ["sample"]
-    info_header = ["info_id", "DP", "Gene_refGene", "Func_refGene", "QD", "SIFT_score", "otg_all", "NM", "LM", "FS", "MQ0", "attributes"]
+    info_header = ["info_id", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "dbSNP", "DP", "Gene_refGene", "Func_refGene", "QD", "SIFT_score", "otg_all", "NM", "LM", "FS", "MQ0", "attributes"]
     gene_header = ["gene_id"]
     chromosome_header = ["chromosome"]
 
     # ---- relazioni
     contains_header = ["name", "info_id"]
-    for_variant_header = ["info_id", "variant_id", "END", "ID", "QUAL", "FILTER", "FORMAT", "HETEROZIGOSITY", "dbSNP"]
+    for_variant_header = ["info_id", "variant_id"]
     of_species_header = ["sample", "species"]
     in_variant_header = ["gene_id", "variant_id"]
     has_variant_header = ["chromosome", "variant_id"]
@@ -324,28 +328,14 @@ def main(argv):
 
             "CHROM": record.CHROM,
             "POS": record.POS,
-            #"START": record.start,
-            "END": record.end,
-            "ID": record.ID or '.',
             "REF": record.REF,
-            "ALT": ";".join(str(v) for v in record.ALT) if isinstance(record.ALT,list) else record.ALT,
-            #"AFFECTED_START": record.affected_start,
-            #"AFFECTED_END": record.affected_end,
-            "QUAL": record.QUAL,
-            "FILTER": record.FILTER or 'PASS',
-            "FORMAT": record.FORMAT or '.',
-            "HETEROZIGOSITY": record.heterozygosity,
+            "ALT": ";".join(str(v) for v in record.ALT) if isinstance(record.ALT,list) else record.ALT,            
             "MUTATION": record.var_type,
-            "dbSNP": ""
         }
 
         
         # Aggiorno le statistiche sul file
         statistics["total"] += 1
-        statistics["hom"] += record.num_hom_ref
-        statistics["het"] += record.num_het
-        statistics["hom_alt"] += record.num_hom_alt
-        statistics["uncalled"] += record.num_unknown
 
         if variant["MUTATION"] == 'snp':
             statistics["snp"] += 1
@@ -358,16 +348,23 @@ def main(argv):
         # Costruisco la stringa della lista degli attributi delle annotazioni (sono costretto a farlo perchè non ho un modo univoco per sapere a priori i campi presenti)
         annotation = {
             "info_id": uuid.uuid4(),
-            "DP": "",
-            "Gene.refGene": "",
-            "Func.refgene": "",
-            "otg_all": "",
-            "QD": "",
-            "NM": "",
-            "LM": "",
-            "FS": "",
-            "MQ0": "",
-            "SIFT_score": "",
+            "END": record.end,
+            "ID": record.ID or '.',
+            "QUAL": record.QUAL,
+            "FILTER": record.FILTER or 'PASS',
+            "FORMAT": record.FORMAT or '.',
+            "HETEROZIGOSITY": record.heterozygosity,
+            "dbSNP": "",
+            "DP": None,
+            "Gene_refGene": None,
+            "Func_refGene": None,
+            "otg_all": None,
+            "QD": None,
+            "NM": None,
+            "LM": None,
+            "FS": None,
+            "MQ0": None,
+            "SIFT_score": None,
             "attributes": {}
         }
 
@@ -376,10 +373,12 @@ def main(argv):
 
             if re.match('(\w*)snp(\w*)', key):
                 
-                variant["dbSNP"] = ";".join(str(v) for v in value) if isinstance(value,list) else value
-                variant["ID"] = ";".join(str(v) for v in value) if isinstance(value,list) else value
+                annotation["dbSNP"] = ";".join(str(v) for v in value) if isinstance(value,list) else value
+                annotation["ID"] = ";".join(str(v) for v in value) if isinstance(value,list) else value
                 
-                if variant["dbSNP"] == 'None':
+                if annotation["dbSNP"] == 'None':
+                    annotation["dbSNP"] = None
+                    annotation["ID"] = None
                     statistics['not_in_dbSNP'] += 1
                 else:
                     statistics['in_dbSNP'] += 1
@@ -389,17 +388,21 @@ def main(argv):
                 if value:
                     annotation['otg_all'] = value
                     statistics['in_1000g'] += 1
+                    continue
                 else:
                     statistics['not_in_1000g'] += 1
                 
 
             #annotation["attributes"] += key + "=" + ( ";".join(str(v) for v in value) if isinstance(value,list) else str(value) ) + ","
             #annotation["attributes"][key] = value[0] if isinstance(value,list) and len(value) == 1 else value
-            if key.replace(".", "_") in info_header:
+            if key.replace('.', '_') in info_header:
+
                 if key == "LM":
                     annotation[key] = inferType(key, value[0].split('_'))
+                    continue
                 else:
-                    annotation[key] = inferType(key, value)
+                    annotation[key.replace('.', '_')] = inferType(key, value)
+                    continue
             else:
                 annotation["attributes"][key] = inferType(key, value)
             #if isinstance(value, list):
@@ -437,13 +440,20 @@ def main(argv):
                 "attributes": {}
             }
 
+        
+        
+        
             if not sample.gt_type:
-                genotype["state"] = "None"
+                statistics["uncalled"] += 1
+                genotype["state"] = "uncalled"
             elif sample.gt_type == 0:
+                statistics["hom"] += 1
                 genotype["state"] = "hom_ref"
             elif sample.gt_type == 1:
+                statistics["hom_alt"] += 1
                 genotype["state"] = "hom_alt"
             elif sample.gt_type == 2:
+                statistics["het"] += 1
                 genotype["state"] = "het"
 
                 

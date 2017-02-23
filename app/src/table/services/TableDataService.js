@@ -20,7 +20,7 @@ class TableDataService {
         self.loadVariantsFromQuery = function(query) {
             console.log('Retrieving data for selected query...');
 
-            return $http.get("http://localhost:8000/dataService/" + query.username + "/" + "testExp" + "/" + query.file + "/details/?page=" + query.page + "&limit=" + query.limit, {
+            return $http.get("http://localhost:8000/dataService/" + query.username + "/" + "myExp" + "/" + query.file + "/details/?page=" + query.page + "&limit=" + query.limit, {
                 'params': {
                     "filters": query.filters
                 } 

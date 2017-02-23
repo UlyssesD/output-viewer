@@ -31,6 +31,12 @@ class TableDataController {
 
         self.config = config;
 
+        $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + "myExp" + "/" + self.query.file + "/filters/")
+            .then(function(response) {
+                console.log("FILTERS RETRIEVED");
+                self.filters = response.data;
+                console.log(self.filters)
+            })
 
         self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
             self.processDataForVisualization(data);
@@ -49,13 +55,7 @@ class TableDataController {
             self.data = data;
 
             //self.template = self.config.row.join("\n");
-            if (self.filters == null)
-                $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + "testExp" + "/" + self.query.file + "/filters/")
-                .then(function(response) {
-                    console.log("FILTERS RETRIEVED");
-                    self.filters = response.data;
-                    console.log(self.filters)
-                })
+            
 
 /*
             for( var i = 0; i < data.variants.length; i++) {

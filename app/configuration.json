@@ -4,7 +4,7 @@
         "port": 7474,
         "username": "neo4j",
         "password": "password",
-        "temp_folder": "C:/xampp/htdocs/output-viewer/app/api/temp/"
+        "temp_folder": "/home/stefano_d/Documenti/temp/"
     },
     "website": {
         "address": "localhost/output-viewer/"

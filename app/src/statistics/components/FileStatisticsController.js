@@ -13,17 +13,14 @@ class FileStatisticsController {
         self.config = config;
 
         self.query = {
+            'username': 'lola',
             'experiment': $routeParams.experiment,
             'file': $routeParams.filename
         }
 
+        console.log(self.query)
 
-
-        FileStatisticsService.loadFileStatistics(self.query).then(function (data) {
-            console.log(data);
-            self.data = data;
-
-        }).catch(function (error) { console.log(error) });
+        FileStatisticsService.loadFileStatistics(self.query).then(self.processDataForVisualization).catch(function (error) { console.log(error) });
 
         self.processDataForVisualization = function (data) {
             self.data = data;

@@ -19,7 +19,10 @@ class FileExplorerService {
         self.loadData = function(query) {
             console.log('Load file list for user ' + query.username + '...')
 
-            return $http({
+            return $http.get("http://" + config.django.address + ":" + config.django.port + "/dataService/" + query.username + "/" + query.experiment + "/files/")
+            .then(self.statisticsRetrieved);
+
+            /*return $http({
                 method: 'POST',
                 url: 'http://' + config.neo4j.address + ':' + config.neo4j.port + '/db/data/transaction/commit',
                 headers: {
@@ -39,7 +42,7 @@ class FileExplorerService {
                         }
                     ]
                 }
-            }).then(self.dataRetrieved);
+            }).then(self.dataRetrieved);*/
         }
 
         // Metodo chiamato una volta ottenute le statistiche sul file dal database. Riorganizzo i dati prima di passarli alla vista
@@ -47,7 +50,7 @@ class FileExplorerService {
             console.log(response);
             console.log('File list successfully retrieved');
 
-             var data = {
+            /* var data = {
                 elements: []
             };
 
@@ -59,7 +62,9 @@ class FileExplorerService {
                 })
             }
             
-            return data;
+            return data;*/
+
+            return response.data;
         }
     }
 

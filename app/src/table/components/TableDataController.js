@@ -1,4 +1,5 @@
 import config from "src/table/config/vcf.config.json!json";
+import generalConfig from "configuration.json!json";
 
 class TableDataController {
 
@@ -32,7 +33,7 @@ class TableDataController {
 
         self.config = config;
 
-        $http.get("http://localhost:8000/dataService/" + self.query.username + "/" + self.query.experiment + "/" + self.query.file + "/filters/")
+        $http.get("http://" + generalConfig.django.address + ":" + generalConfig.django.port + "/dataService/" + self.query.username + "/" + self.query.experiment + "/" + self.query.file + "/filters/")
             .then(function(response) {
                 console.log("FILTERS RETRIEVED");
                 self.filters = response.data;
@@ -85,6 +86,44 @@ class TableDataController {
             }).catch(function () { console.log('Some error occurred') });
 
         }
+
+        // ---- Funzione che riceve da server i dati da visualizzare nel form corrente
+        self.fetchFields = function(formElement) {
+            
+            if (!formElement.options) {
+
+                return $http.get(formElement.url)
+                    .then(function(response) {
+                        console.log("Options for field " + formElement.label + " -- RETRIEVED");
+                        console.log(response.data);
+                        
+                        formElement.options = response.data.elements;
+                    })
+
+            }    
+        }
+
+        self.searchTerm = function(searchText, formElement) {
+            
+            return $http.get(formElement.url + "?q=" + searchText)
+                .then(function(response) {
+                    console.log("Matches for search term " + searchText + " -- RETRIEVED")
+                    console.log(response.data);
+
+                    return response.data.elements
+                })
+        }
+
+        self.createFilterFor = function (query) {
+            var lowercaseQuery = angular.lowercase(query);
+
+            return function filterFn(elem) {
+                var lowercaseElem = angular.lowercase(elem)
+                return (lowercaseElem.indexOf(lowercaseQuery) === 0);
+            };
+
+        }
+
         // Metodo chiamato per visualizzare le annotazioni di una particolare variante
         self.showAnnotations = function ($event, selected) {
 

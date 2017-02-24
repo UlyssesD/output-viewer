@@ -29,22 +29,43 @@
             
             <span ng-switch-when="numeric">
                 <md-input-container>
-                    <input ng-model="el.min" type="number">
+                    <input ng-model="el.min" type="number"  aria-label="min value">
                 </md-input-container>
                 <md-label> &le; {{el.label}} &le; </md-label>
                 <md-input-container>
-                <input ng-model="el.max" type="number">
+                <input ng-model="el.max" type="number" aria-label="max value">
                 </md-input-container>
             </span>
 
 
             <md-input-container ng-switch-when="string">
                 <label>{{el.label}}</label>
-                <input ng-model="el.value" md-maxlength="20" type="text">
+                <input ng-model="el.value" md-maxlength="20" type="text" aria-label="search term">
             </md-input-container>
             
             <md-input-container ng-switch-when="boolean">
-                <md-checkbox ng-model="el.value" aria-label=">el.label">{{ el.label }}</md-checkbox>
+                <md-checkbox ng-model="el.value" aria-label="el.label">{{ el.label }}</md-checkbox>
+            </md-input-container>
+
+            <md-input-container ng-switch-when="select">
+                <label>{{el.label}}</label>
+                <md-select ng-model="el.value" md-on-open="$ctrl.fetchFields(el)">
+                    <md-option ng-repeat="opt in el.options" ng-value="opt.value">
+                        {{opt.option}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+
+            <md-input-container ng-switch-when="autocomplete">
+                
+                <md-autocomplete md-floating-label="{{el.label}}" md-clear-button="true" md-autoselect md-selected-item="el.value" md-search-text="searchText" md-items="item in $ctrl.searchTerm(searchText, el)" md-item-text="item">
+                    <md-item-template>
+                        <span md-highlight-text="searchText">{{item}}</span>
+                    </md-item-template>
+                    <md-not-found>
+                        No matches found.
+                    </md-not-found>
+                </md-autocomplete>
             </md-input-container>
     </md-list-item>
 </md-list>

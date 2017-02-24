@@ -1,3 +1,5 @@
+import config from "configuration.json!json";
+
 class FileExplorerController {
 
     constructor($http, $log, FileExplorerService) {
@@ -17,7 +19,7 @@ class FileExplorerController {
 
 
 
-        $http.get("http://localhost:8000/dataService/"+ self.query.username +"/experiments/")
+        $http.get("http://" + config.django.address + ":" + config.django.port + "/dataService/"+ self.query.username +"/experiments/")
             .then(function(response) {
 
                 console.log("LIST OF EXPERIMENTS RETRIEVED");
@@ -26,19 +28,20 @@ class FileExplorerController {
                 console.log(self.experiments)
             });
 
-        FileExplorerService.loadData(self.query).then(function(data){
-            self.processDataForVisualization(data);
-        }).catch(function (err) { console.log('Some error occurred',  err) });
+        //FileExplorerService.loadData(self.query).then(function(data){
+        //    self.processDataForVisualization(data);
+        //}).catch(function (err) { console.log('Some error occurred',  err) });
 
         self.show = function() {
+            console.log(self.query.experiment)
             FileExplorerService.loadData(self.query).then(function(data){
                 self.processDataForVisualization(data);
             }).catch(function (err) { console.log('Some error occurred',  err) });
         }
 
-        self.processDataForVisualization = function(data) {
-            self.data = data;
-
+        self.processDataForVisualization = function(response) {
+            self.data = response.data;
+            console.log("list of files -- RETRIEVED")
             console.log(self.data);
         };
     }

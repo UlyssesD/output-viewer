@@ -20,13 +20,17 @@ class FileStatisticsController {
 
         console.log(self.query)
 
-        FileStatisticsService.loadFileStatistics(self.query).then(self.processDataForVisualization).catch(function (error) { console.log(error) });
+        FileStatisticsService.loadFileStatistics(self.query)
+            .then(function(data) {self.processDataForVisualization(data) })
+            .catch(function (error) { console.log(error) });
 
         self.processDataForVisualization = function (data) {
+            console.log(data);
+            
             self.data = data;
 
-            self.template = self.config.row.join("\n");
-            console.log(self.data)
+            self.template = self.config.elements.join("\n");
+            //console.log(self.data)
         }
 
     }

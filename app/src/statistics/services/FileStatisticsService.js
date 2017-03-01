@@ -19,11 +19,11 @@ class FileStatisticsService {
         self.loadFileStatistics = function (query) {
             console.log('Load file informations for ' + query.file.split('.vcf')[0] + '...')
 
-        //return $http.get("http://" + config.django.address + ":" + config.django.port + "/dataService/" + query.username + "/" + query.experiment + "/" + query.file + "/statistics/")
-        //    .then(self.statisticsRetrieved);
+            return $http.get("http://" + config.django.address + ":" + config.django.port + "/dataService/" + query.username + "/" + query.experiment + "/" + query.file + "/statistics/")
+                .then(self.statisticsRetrieved);
         
 
-           return $http({
+        /*   return $http({
                 method: 'POST',
                 url: 'http://' + config.neo4j.address + ':' + config.neo4j.port + '/db/data/transaction/commit',
                 headers: {
@@ -44,14 +44,14 @@ class FileStatisticsService {
                         }
                     ]
                 }
-            }).then(self.statisticsRetrieved);
+            }).then(self.statisticsRetrieved);*/
        }
 
         // Metodo chiamato una volta ottenute le statistiche sul file dal database. Riorganizzo i dati prima di passarli alla vista
         self.statisticsRetrieved = function (response) {
             console.log('Statistics successfully retrieved');
-            return response.data.results[0].data[0].row[0];
-            //return response.data;
+            //return response.data.results[0].data[0].row[0];
+            return response.data;
         }
     }
 

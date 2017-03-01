@@ -67,7 +67,7 @@ class TableDataService {
         // Metodo chiamato una volta ottenute le varianti dal database. Riorganizzo i dati prima di passarli alla vista
         self.variantRetrieved = function(response) {
             console.log('Data successfully retrieved');
-            console.log(response);
+            //console.log(response);
 
 /*
             var data = {

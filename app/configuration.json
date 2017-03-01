@@ -1,7 +1,7 @@
 {
     "django": {
         "address": "localhost",
-        "port": "8000"
+        "port": "80"
     },
     "neo4j": {
         "address": "localhost",

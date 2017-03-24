@@ -443,7 +443,7 @@ def main(argv):
         
         
         
-            if not sample.gt_type:
+            if sample.gt_type == None:
                 statistics["uncalled"] += 1
                 genotype["state"] = "uncalled"
             elif sample.gt_type == 0:

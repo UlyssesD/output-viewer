@@ -79,8 +79,11 @@ class TableDataController {
 
         self.filterTable = function () {
             console.log("FILTER SUBMISSION TO SERVER");
+            
             self.query.filters = self.filters
 
+
+            console.log(self.query.filters)
             self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
                 self.processDataForVisualization(data);
             }).catch(function () { console.log('Some error occurred') });

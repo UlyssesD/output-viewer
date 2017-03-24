@@ -50,8 +50,9 @@
             <md-input-container ng-switch-when="select">
                 <label>{{el.label}}</label>
                 <md-select ng-model="el.value" md-on-open="$ctrl.fetchFields(el)">
-                    <md-option ng-repeat="opt in el.options" ng-value="opt.value">
-                        {{opt.option}}
+                    <md-option ng-value="null"> -- All -- </md-option>
+                    <md-option ng-repeat="opt in el.options" ng-value="opt">
+                        {{opt}}
                     </md-option>
                 </md-select>
             </md-input-container>

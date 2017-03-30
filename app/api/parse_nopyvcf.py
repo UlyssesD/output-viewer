@@ -2,20 +2,21 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-import strconv
 import re
-import vcf
+import csv
+import gzip
 import uuid
 import sys, os
 
 
 # ---- VARIABILI GLOBALI
 
-ROWS = []			# memorizza le righe del file vcf
-SAMPLES = []		# tiene traccia dei campioni presenti nel file
+ROWS = []						# memorizza le righe del file vcf
+SAMPLES = []					# tiene traccia dei campioni presenti nel file
 
-DICTIONARY = {}		# utilizzato per memorizzare i valori dei campi stringa del file (utile lato client per generare le select e le autocomplete)
-TYPES = {}			# utilizzato per memorizzare i tipi dei campi presenti nel file (utile lato client per la generazione dei form)
+HEADERS = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'FORMAT']			# utilizzato per memorizzare le colonne del file finale
+DICTIONARY = {}					# utilizzato per memorizzare i valori dei campi stringa del file (utile lato client per generare le select e le autocomplete)
+TYPES = {}						# utilizzato per memorizzare i tipi dei campi presenti nel file (utile lato client per la generazione dei form)
 
 
 
@@ -84,8 +85,10 @@ def main(argv):
     for entry in [("CHROM", "string"), ("POS", "int"), ("ID", "string"), ("REF", "string"), ("ALT", "string"), ("QUAL", "float"), ("FILTER", "string"), ("FORMAT", "string")]:
     	addType(entry[0], entry[1])
 
-    for line in iter(file):
+    print "Scanning headers of output file"
 
+    # ---- leggo una prima volta il file per intero per calcolare tutti gli header del file csv finale
+    for line in iter(file):
     	# ---- salto gli header del file
     	if re.match("^##.*", line):
     		print "IGNORING LINE"
@@ -93,6 +96,53 @@ def main(argv):
     	
     	if re.match("^#CHROM\t", line):
     		print "HEADER OF VCF FILE"
+
+    		SAMPLES = line.strip('#').split('\t')[9:]
+    		print SAMPLES, "length:", len(SAMPLES)
+    		continue
+
+    	row_count += 1
+
+    	# ---- comincio a parsare le informazioni della riga
+    	values = line.split('\t')
+
+    	# ---- ottengo la lista delle annotazioni della riga
+    	annotations = values[7].split(';')
+
+    	for element in annotations:
+
+    		# ---- divido ogni annotazione come una coppia chiave - valore
+    		key, value = (element.split('=') + [None]*2)[:2]
+
+    		if key not in HEADERS:
+    			HEADERS.append(key)
+    			
+    	sys.stdout.write("%d lines scanned %s"%(row_count,"\r"))
+        sys.stdout.flush();
+
+
+    sys.stdout.write("%d lines scanned %s"%(row_count,"\n"))
+    sys.stdout.flush();
+    
+    print "HEADERS:", HEADERS 
+    print "Processing lines of file..."
+
+    file = open(input_file,'r')
+    output = gzip.open(data_folder + username + "_" + experiment + "_" + os.path.basename(file.name) + ".data.gz", "wb")
+    writer = csv.DictWriter(output, HEADERS, dialect='excel-tab')
+
+    writer.writeheader()
+
+    row_count = 0
+    for line in iter(file):
+
+    	# ---- salto gli header del file
+    	if re.match("^##.*", line):
+    		#print "IGNORING LINE"
+    		continue
+    	
+    	if re.match("^#CHROM\t", line):
+    		#print "HEADER OF VCF FILE"
 
     		SAMPLES = line.strip('#').split('\t')[9:]
     		print SAMPLES, "length:", len(SAMPLES)
@@ -146,19 +196,32 @@ def main(argv):
     			row[key] = True
 
     	#print row
-    	ROWS.append(row)
+    	writer.writerow(row)
+
+    #	ROWS.append(row)
 
     	sys.stdout.write("%d lines scanned %s"%(row_count,"\r"))
         sys.stdout.flush();
 
+    #    if not (row_count % 100000):
+
+    #        print ""
+            
+    #        dataframe = pd.DataFrame(ROWS)
+            
+    #        dataframe.to_csv( data_folder + username + "_" + experiment + "_" + os.path.basename(file.name) + ".data.gz", sep="\t", index=False, compression="gzip", mode='a')
+           
+    #        del ROWS[:]
+
+    output.close()
     # ---- costruisco il dataframe con pandas
     #dataframe = pd.DataFrame(data=ROWS, columns=CSV_HEADERS)
-    dataframe = pd.DataFrame(ROWS)
+    #dataframe = pd.DataFrame(ROWS)
     
     # ---- memorizzo il risultato in un file csv
-    dataframe.to_csv( data_folder + username + "_" + experiment + "_" + os.path.basename(file.name) + ".data.gz", sep="\t", index=False, compression="gzip")
+    #dataframe.to_csv( data_folder + username + "_" + experiment + "_" + os.path.basename(file.name) + ".data.gz", sep="\t", index=False, compression="gzip", mode='a')
 
-
+ 
     # ---- costrisco il dataframe dei tipi
     key_types = pd.DataFrame.from_dict(TYPES, orient="index")
 

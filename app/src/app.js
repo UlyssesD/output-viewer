@@ -24,8 +24,11 @@ import Table from 'src/table/Table';
 import Statistics from 'src/statistics/Statistics';
 
 export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMessages', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Uploader.name, Table.name, Statistics.name ] )
-  .config(($routeProvider, $mdIconProvider, $mdThemingProvider) => {
+  .config(($httpProvider, $routeProvider, $mdIconProvider, $mdThemingProvider) => {
 
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+    
     $mdIconProvider
       .icon("menu_icon", "./assets/svg/menu.svg", 24);
       

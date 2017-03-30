@@ -22,6 +22,7 @@ class TableDataController {
             'file': $routeParams.filename,
             'limit': 5,
             'page': 1,
+            'last': 1,
             'skip': 0,
             'filters': null
         };
@@ -44,8 +45,15 @@ class TableDataController {
             self.processDataForVisualization(data);
         }).catch(function () { console.log('Some error occurred') });
 
-        self.getElems = function () {
+        self.getElems = function (backwards) {
+
             console.log('Getting elements');
+            
+            if (backwards == true)
+                self.query.last = self.data.last - 2*self.query.limit;
+            else    
+            self.query.last = self.data.last;
+            console.log('Last=' + self.query.last)
             self.query.skip = self.query.limit * (self.query.page - 1);
 
             self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
@@ -54,8 +62,7 @@ class TableDataController {
         };
 
         self.processDataForVisualization = function(data) {
-            self.data = data;
-
+            self.data = data; 
             //self.template = self.config.row.join("\n");
             
 
@@ -79,9 +86,18 @@ class TableDataController {
 
         self.filterTable = function () {
             console.log("FILTER SUBMISSION TO SERVER");
-            
-            self.query.filters = self.filters
+            self.query.last = 1;
+            self.query.filters = (JSON.parse(JSON.stringify(self.filters)))
 
+            var idx
+            for (idx in self.query.filters.list) {
+
+                if ( (self.query.filters.list[idx].type == "autocomplete") ) {
+                    delete self.query.filters.list[idx]["options"]
+                }
+            }
+            
+            
 
             console.log(self.query.filters)
             self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
@@ -108,6 +124,9 @@ class TableDataController {
 
         self.searchTerm = function(searchText, formElement) {
             
+
+            return formElement.options.filter(self.createFilterFor(searchText))
+            /*
             return $http.get(formElement.url + "?q=" + searchText)
                 .then(function(response) {
                     console.log("Matches for search term " + searchText + " -- RETRIEVED")
@@ -115,6 +134,7 @@ class TableDataController {
 
                     return response.data.elements
                 })
+            */
         }
 
         self.createFilterFor = function (query) {

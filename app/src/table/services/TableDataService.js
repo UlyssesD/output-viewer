@@ -16,18 +16,54 @@ class TableDataService {
 
         // --- Metodi pubblici della classe ---
 
+        self.getCount = function(query) {
+            return $http({
+                method: 'POST',
+                url: "http://" + config.django.address + ":" + config.django.port + "/dataService/" + query.username + "/" + query.experiment + "/" + query.file + "/count/",
+                headers: {
+                    'Content-Type': 'Application/json',
+                    'Accepts': 'Application/json',
+                    'X-Stream': 'true'
+                },
+                data: {
+
+                    "first": query.first,
+                    "filters": query.filters
+                }
+
+            }).then(self.variantRetrieved);
+        }
+
         // Interrogo il database per ottenere le varianti secondo la query passata in input
         self.loadVariantsFromQuery = function(query) {
             console.log('Retrieving data for selected query...');
-
-            return $http.get("http://" + config.django.address + ":" + config.django.port + "/dataService/" + query.username + "/" + query.experiment + "/" + query.file + "/details/?last=" + query.last + "&limit=" + query.limit, {
+/*
+            return $http.post("http://" + config.django.address + ":" + config.django.port + "/dataService/" + query.username + "/" + query.experiment + "/" + query.file + "/details/", {
                 'params': {
+                    "last": query.last,
+                    "limit": query.limit,
                     "filters": JSON.stringify(query.filters)
                 } 
             })
             .then(self.variantRetrieved);
+*/
+            return $http({
+                method: 'POST',
+                url: "http://" + config.django.address + ":" + config.django.port + "/dataService/" + query.username + "/" + query.experiment + "/" + query.file + "/details/",
+                headers: {
+                    'Content-Type': 'Application/json',
+                    'Accepts': 'Application/json',
+                    'X-Stream': 'true'
+                },
+                data: {
+                    "last": query.last,
+                    "limit": query.limit,
+                    "filters": query.filters
+                }
 
-/*
+            }).then(self.variantRetrieved);
+
+/*          
             return $http({
                 method: 'POST',
                 url: 'http://' + config.neo4j.address + ':' + config.neo4j.port + '/db/data/transaction/commit',

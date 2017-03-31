@@ -22,13 +22,17 @@ class TableDataController {
             'file': $routeParams.filename,
             'limit': 5,
             'page': 1,
+            'first': 1,
             'last': 1,
             'skip': 0,
             'filters': null
         };
 
-        self.filters = null;
+        self.hits = null;
 
+        self.filters = null;
+        self.previous = [];
+        self.limit = 5;
 
         console.log($routeParams);
 
@@ -43,16 +47,33 @@ class TableDataController {
 
         self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
             self.processDataForVisualization(data);
+
+            console.log("RETRIEVING COUNT OF HITS...")
+            self.query.first = data.first;
+            TableDataService.getCount(self.query).then(function(data){
+                console.log("HIT COUNT RETRIEVED")
+                self.hits =data.count;
+            })
+
         }).catch(function () { console.log('Some error occurred') });
 
-        self.getElems = function (backwards) {
+        self.getElems = function (type) {
 
             console.log('Getting elements');
-            
-            if (backwards == true)
-                self.query.last = self.data.last - 2*self.query.limit;
-            else    
-            self.query.last = self.data.last;
+
+            switch(type){
+                case "next":
+                    self.previous.push(self.data.first);
+                    self.query.last = self.data.last;
+                    break;
+                case "back":
+                    self.query.last = self.previous.pop();
+                    break;
+                case "limit":
+                    self.query.last = self.previous.length != 0 ? self.previous.pop(): self.data.first;
+                    break;
+            }   
+            console.log("Previous = [" + self.previous + "]")
             console.log('Last=' + self.query.last)
             self.query.skip = self.query.limit * (self.query.page - 1);
 
@@ -87,12 +108,15 @@ class TableDataController {
         self.filterTable = function () {
             console.log("FILTER SUBMISSION TO SERVER");
             self.query.last = 1;
+            self.hits = null;
+            self.previous = []
+
             self.query.filters = (JSON.parse(JSON.stringify(self.filters)))
 
             var idx
             for (idx in self.query.filters.list) {
 
-                if ( (self.query.filters.list[idx].type == "autocomplete") ) {
+                if ( (self.query.filters.list[idx].type == "autocomplete") || self.query.filters.list[idx].type == "select" ) {
                     delete self.query.filters.list[idx]["options"]
                 }
             }
@@ -102,6 +126,14 @@ class TableDataController {
             console.log(self.query.filters)
             self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
                 self.processDataForVisualization(data);
+
+                console.log("RETRIEVING COUNT OF HITS...")
+                self.query.first = data.first;
+                TableDataService.getCount(self.query).then(function(data){
+                    console.log("HIT COUNT RETRIEVED")
+                    self.hits =data.count;
+                })
+
             }).catch(function () { console.log('Some error occurred') });
 
         }

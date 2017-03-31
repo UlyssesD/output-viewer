@@ -1,10 +1,21 @@
 <md-card>
     <md-toolbar class="md-table-toolbar md-default">
         <div class="md-toolbar-tools">
-        <span>Nutrition</span>
+        <span ng-hide="$ctrl.hits != null">
+            <md-progress-circular ng-disabled="$ctrl.hits != null" class="md-hue-2" md-diameter="20px"></md-progress-circular>
+        </span>
+        <span ng-hide="$ctrl.hits == null">Total number of rows: {{$ctrl.hits}}</span>
         <span flex></span>
-        <span><md-button ng-click="$ctrl.getElems(true)"> Previous </md-button></span>
-        <span><md-button ng-click="$ctrl.getElems(false)"> Next </md-button></span>
+        <span>
+            <md-input-container md-no-float>
+                <label>Rows per page:</label>
+                <md-select ng-model="$ctrl.query.limit" placeholder="Rows per page" ng-change="$ctrl.getElems('limit')">
+                    <md-option ng-value="value" ng-repeat="value in [5, 10, 15, 20]">{{ value }}</md-option>
+                </md-select>
+            </md-input-container>
+        </span>
+        <span><md-button class="md-raised" ng-disabled="$ctrl.previous.length == 0" ng-click="$ctrl.getElems('back')"> Previous </md-button></span>
+        <span><md-button class="md-raised" ng-diabled="$ctrl.data.rows.length < $ctrl.query.limit" ng-click="$ctrl.getElems('next')"> Next </md-button></span>
     </div>
     </md-toolbar>
     <md-table-container>

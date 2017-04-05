@@ -1,95 +1,136 @@
-<md-card>
+<md-toolbar layout="row" class="md-toolbar-tools md-whiteframe-4dp" md-colors="{background: 'default-primary-hue-2', color: 'background-A100'}">
+    <section flex="5">
+
+    </section>
+    <span ng-if="$ctrl.data.active_filters.length == null" flex="30"></span>
+    <section ng-if="$ctrl.data.active_filters.length == 0" flex="30">
+    <span><em>No active filters yet.</em></span>
+    </section>
+    <section ng-if="$ctrl.data.active_filters.length > 0" flex="30">
+        <md-chips class="custom-chips" ng-model="$ctrl.data.active_filters" readonly="true"
+            md-removable="true" md-on-remove="$ctrl.updateFilters($chip)">
+    <md-chip-template>
+        <span>
+            <strong>{{$chip.name}}</strong>
+            <em>({{$chip.value}})</em>
+        </span>
+    </md-chip-template>
+    <button md-chip-remove class="md-primary filterchips">
+        <md-icon md-font-set="material-icons"> clear </md-icon>
+    </button>
+</md-chips>
+    </section>
+    <section flex="50">
+      <!--<h1>
+        <span>My files</span>
+        <md-icon class="material-icons" md-font-set='material-icons' style="color: white">chevron_right</md-icon>
+        <span>U11_80M_R2.annotated.hg19_multianno</span>
+      </h1>-->
+
+</section>
+<section flex="15" layout="row" layout-align="end center">
+ 
+  <md-button class="md-raised md-accent" ng-click="$ctrl.openDialog($event, 'filters')">
+    Filters
+  </md-button>
+</section>
+</md-toolbar>
+
+<section layout="row" flex>
+
+</section>
+<section layout="row" flex>     
+<md-card layout="column" flex="70">
     <md-toolbar class="md-table-toolbar md-default">
         <div class="md-toolbar-tools">
-        <span ng-hide="$ctrl.hits != null">
-            <md-progress-circular ng-disabled="$ctrl.hits != null" class="md-hue-2" md-diameter="20px"></md-progress-circular>
-        </span>
-        <span ng-hide="$ctrl.hits == null">Total number of rows: {{$ctrl.hits}}</span>
-        <span flex></span>
-        <span>
-            <md-input-container md-no-float>
-                <label>Rows per page:</label>
-                <md-select ng-model="$ctrl.query.limit" placeholder="Rows per page" ng-change="$ctrl.getElems('limit')">
-                    <md-option ng-value="value" ng-repeat="value in [5, 10, 15, 20]">{{ value }}</md-option>
-                </md-select>
-            </md-input-container>
-        </span>
-        <span><md-button class="md-raised" ng-disabled="$ctrl.previous.length == 0" ng-click="$ctrl.getElems('back')"> Previous </md-button></span>
-        <span><md-button class="md-raised" ng-diabled="$ctrl.data.rows.length < $ctrl.query.limit" ng-click="$ctrl.getElems('next')"> Next </md-button></span>
-    </div>
+            <span ng-hide="$ctrl.hits != null">
+                <md-progress-circular ng-disabled="$ctrl.hits != null" class="md-hue-2" md-diameter="20px"></md-progress-circular>
+            </span>
+            <span ng-hide="$ctrl.hits == null">Total number of rows: {{$ctrl.hits}}</span>
+            <span flex></span>
+            <span>
+                <md-input-container md-no-float>
+                    <label>Rows per page:</label>
+                    <md-select ng-model="$ctrl.query.limit" placeholder="Rows per page" ng-change="$ctrl.getElems('limit')">
+                        <md-option ng-value="value" ng-repeat="value in [10, 15, 20]">{{ value }}</md-option>
+                        </md-select>
+                    </md-input-container>
+            </span>
+            <span><md-button class="md-raised" ng-disabled="$ctrl.previous.length == 0" ng-click="$ctrl.getElems('back')"> Previous </md-button></span>
+            <span><md-button class="md-raised" ng-diabled="($ctrl.hits == null) || ($ctrl.query.last >= $ctrl.hits)" ng-click="$ctrl.getElems('next')"> Next </md-button></span>
+        </div>
     </md-toolbar>
     <md-table-container>
         <table md-table md-progress="$ctrl.promise">
             <thead md-head>
                 <tr md-row>
-                    <th md-column ng-repeat="h in $ctrl.data.header track by $index"><span md-colors="{color: 'default-primary-hue-2'}">{{ h }}</span></th>
+                    <th md-column ng-repeat="h in $ctrl.data.header track by $index" ng-show="$ctrl.show_header[$index]"><span md-colors="{color: 'default-primary-hue-2'}">{{ h }}</span></th>
                 </tr>
             </thead>
-            <tbody md-body>
-                <tr md-row ng-repeat="row in  $ctrl.data.rows track by $index" ng-click="$ctrl.showAnnotations($event, el)">
-                    <td md-cell ng-repeat="el in row track by $index"><span ng-bind-html-unsafe="el">{{el}}</span></td>
+            <tbody md-body style="height:auto; max-height: 400px; overflow-y: auto">
+                <tr md-row ng-repeat="row in  $ctrl.data.rows track by $index" ng-click="$ctrl.selected = row">
+                    <td md-cell ng-repeat="el in row track by $index" ng-show="$ctrl.show_header[$index]">
+                        <span ng-if="!$ctrl.isArray(el)">{{el == null ? ".": el}}</span>
+                        <p ng-if="$ctrl.isArray(el)" ng-repeat="i in el">{{i}}</p>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </md-table-container>
 
-    <!--<md-table-pagination md-boundary-links md-limit="$ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="$ctrl.query.page"
-        md-total="{{$ctrl.data.count}}" md-on-paginate="$ctrl.getElems" md-page-select ></md-table-pagination>-->
+                <!--<md-table-pagination md-boundary-links md-limit="$ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="$ctrl.query.page"
+                    md-total="{{$ctrl.data.count}}" md-on-paginate="$ctrl.getElems" md-page-select ></md-table-pagination>-->
 </md-card>
 
-<section ng-show="$ctrl.filters == null" layout-padding>
-    <p> Loading filters...</p>
-    <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+<section layout="column" flex="30">     
+    
+    <md-card style="height:auto; max-height: 280px;">
+        <md-card-header>
+            <md-card-header-text>
+                <span class="md-title">Table properties</span>
+                <span class="md-subhead">Select columns you want to display</span>
+            </md-card-header-text>
+        </md-card-header>
+        <md-divider></md-divider>
+        <md-card-content style="height:auto; max-height: 300px; overflow-y: auto">
+            <md-list>
+                <md-list-item ng-repeat="h in $ctrl.data.header track by $index"">
+                    <p> {{ h }} </p>
+                    <md-checkbox class="md-secondary" ng-model="$ctrl.show_header[$index]"></md-checkbox>
+                </md-list-item>
+            </md-list>
+        </md-card-content>
+    </md-card>
+
+    <md-card style="height:auto; max-height: 300px;">
+        <md-card-header>
+            <md-card-header-text>
+                <span class="md-title">Information for selected row</span>
+                <span class="md-subhead">Click on a row to view its data</span>
+            </md-card-header-text>
+        </md-card-header>
+        <md-divider></md-divider>
+        <md-card-content style="height:auto; max-height: 250px; overflow-y: auto">
+             <md-list>
+            <ng-repeat ng-repeat="el in $ctrl.selected track by $index">
+                <md-list-item class="md-2-line">
+                    <div class="md-list-item-text" layout="column">
+                        <strong>{{$ctrl.data.header[$index]}}</strong>
+                        <em ng-if="!$ctrl.isArray(el)">{{el == null ? ".": el}}</em>
+                        <!--<em ng-if="$ctrl.isArray(el)">
+                            <ng-repeat ng-repeat="i in el">{{i}} {{$last ? "": ","}}</ng-repeat>
+                        </em>-->
+                        <em ng-if="$ctrl.isArray(el)" ng-repeat="i in el">{{i}}</em>
+                    </div>
+                </md-list-item>
+                </ng-repeat>
+            </ng-repeat>
+        </md-list>
+        </md-card-content>
+    </md-card>
+</section>
 </section>
 
-<form name="filterTable" ng-show="$ctrl.filters != null" layout-padding>
-<md-list>
-    <md-list-item ng-repeat="el in $ctrl.filters.list" ng-switch="el.type">
-            
-            <span ng-switch-when="numeric">
-                <md-input-container>
-                    <input ng-model="el.min" type="number"  aria-label="min value">
-                </md-input-container>
-                <md-label> &le; {{el.label}} &le; </md-label>
-                <md-input-container>
-                <input ng-model="el.max" type="number" aria-label="max value">
-                </md-input-container>
-            </span>
 
 
-            <md-input-container ng-switch-when="string">
-                <label>{{el.label}}</label>
-                <input ng-model="el.value" md-maxlength="20" type="text" aria-label="search term">
-            </md-input-container>
-            
-            <md-input-container ng-switch-when="boolean">
-                <md-checkbox ng-model="el.value" aria-label="el.label">{{ el.label }}</md-checkbox>
-            </md-input-container>
 
-            <md-input-container ng-switch-when="select">
-                <label>{{el.label}}</label>
-                <md-select ng-model="el.value" md-on-open="$ctrl.fetchFields(el)">
-                    <md-option ng-value="null"> -- All -- </md-option>
-                    <md-option ng-repeat="opt in el.options" ng-value="opt">
-                        {{opt}}
-                    </md-option>
-                </md-select>
-            </md-input-container>
-
-            <md-input-container ng-switch-when="autocomplete">
-                
-                <md-autocomplete md-floating-label="{{el.label}}" md-clear-button="true" md-autoselect md-selected-item="el.value" md-search-text="searchText" md-items="item in $ctrl.searchTerm(searchText, el)" md-item-text="item">
-                    <md-item-template>
-                        <span md-highlight-text="searchText">{{item}}</span>
-                    </md-item-template>
-                    <md-not-found>
-                        No matches found.
-                    </md-not-found>
-                </md-autocomplete>
-            </md-input-container>
-    </md-list-item>
-</md-list>
-    <div>
-        <md-button class="md-raised md-primary" ng-click="$ctrl.filterTable()">Submit</md-button>
-    </div>
-</form>

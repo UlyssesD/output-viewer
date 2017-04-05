@@ -3,7 +3,7 @@
 }
 
 .banner {
-  max-height: 2 00px;
+  max-height: 200px;
 }
 
 .logo-name {
@@ -27,3 +27,47 @@
     bottom: 0;
     left: 0;
 }
+
+.custom-chips md-chip {
+  position: relative;
+}
+
+.custom-chips .md-chip-remove-container {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    margin-right: 0;
+    height: 24px; 
+}
+
+ .custom-chips md-chip .md-chip-remove-container button.filterchips {
+      position: relative;
+      height: 24px;
+      width: 24px;
+      line-height: 30px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+      transition: background 0.15s linear;
+      display: block; 
+}
+.custom-chips md-chip .md-chip-remove-container button.filterchips md-icon{
+  position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate3d(-50%, -50%, 0) scale(0.7);
+        color: white;
+        fill: white;
+} 
+
+.custom-chips md-chip .md-chip-remove-container button.filterchips:hover,
+.custom-chips md-chip .md-chip-remove-container button.filterchips:focus {
+  background: rgba(255, 0, 0, 0.8);
+}
+
+.custom-chips md-chips-wrap.md-removable md-chip md-chip-template {
+  padding-right: 5px; }

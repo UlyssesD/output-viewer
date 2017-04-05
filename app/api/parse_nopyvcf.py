@@ -7,7 +7,7 @@ import csv
 import gzip
 import uuid
 import sys, os
-
+from collections import OrderedDict
 
 # ---- VARIABILI GLOBALI
 
@@ -214,6 +214,11 @@ def main(argv):
     #        del ROWS[:]
 
     output.close()
+
+    SORTED = OrderedDict()
+
+    for h in HEADERS:
+        SORTED[h] = TYPES[h]
     # ---- costruisco il dataframe con pandas
     #dataframe = pd.DataFrame(data=ROWS, columns=CSV_HEADERS)
     #dataframe = pd.DataFrame(ROWS)
@@ -223,7 +228,7 @@ def main(argv):
 
  
     # ---- costrisco il dataframe dei tipi
-    key_types = pd.DataFrame.from_dict(TYPES, orient="index")
+    key_types = pd.DataFrame.from_dict(SORTED, orient="index")
 
     key_types.to_csv( data_folder + username + "_" + experiment + "_" + os.path.basename(file.name) + ".types.data.gz", sep="\t", index_label="Key", header=["Type"], compression="gzip")
 

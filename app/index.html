@@ -28,7 +28,7 @@
     </section>
   </md-toolbar>
 
-  <md-toolbar layout="row" class="md-toolbar-tools md-whiteframe-4dp" md-colors="{background: 'default-primary-hue-2', color: 'background-A100'}">
+  <md-toolbar layout="row" class="md-toolbar-tools" md-colors="{background: 'default-primary', color: 'background-A100'}">
     <section flex="15">
 
     </section>
@@ -41,7 +41,7 @@
 
 </section>
 <section flex="15" layout="row" layout-align="end center">
-
+ 
   <md-button class="md-raised md-accent" ng-click="app.openStatistics()">
     Statistics
   </md-button>
@@ -50,11 +50,6 @@
 
 <section layout="row" flex>
 
-  <section layout="column" flex="15">
-    <menu-list></menu-list>
-  </section>
-
-  <md-divider></md-divider>
   <!-- Container #2 -->
 
   <!-- Container #3 (Tolto qui)-->
@@ -81,7 +76,7 @@
           selected="app.selected" >
       </user-details>-->
   <!--</div>-->
-  <ng-view layout="column" md-colors="{background: 'default-grey-200'}" flex>
+  <ng-view layout="row" md-colors="{background: 'default-grey-200'}" flex>
     <!-- Container #4 -->
     <!--<div flex layout="row">-->
 

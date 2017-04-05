@@ -10,8 +10,9 @@ class TableDataController {
     constructor($http, $routeParams, $log, $mdDialog, TableDataService) {
         var self = this;
         self.$log = $log;
-
-        self.selected = [];
+        self.isArray = angular.isArray;
+        //self.show_header = null;
+        self.selected = null;
         self.selectedIndex = 0;
         self.config = {};
         self.rows = [];
@@ -20,7 +21,7 @@ class TableDataController {
             'username': 'lola',
             'experiment': $routeParams.experiment,
             'file': $routeParams.filename,
-            'limit': 5,
+            'limit': 10,
             'page': 1,
             'first': 1,
             'last': 1,
@@ -32,24 +33,19 @@ class TableDataController {
 
         self.filters = null;
         self.previous = [];
-        self.limit = 5;
+        self.limit = 10;
 
         console.log($routeParams);
 
         self.config = config;
 
-        $http.get("http://" + generalConfig.django.address + ":" + generalConfig.django.port + "/dataService/" + self.query.username + "/" + self.query.experiment + "/" + self.query.file + "/filters/")
-            .then(function(response) {
-                console.log("FILTERS RETRIEVED");
-                self.filters = response.data;
-                console.log(self.filters)
-            })
-
         self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
             self.processDataForVisualization(data);
-
+            self.show_header = data.show_header;
+            
             console.log("RETRIEVING COUNT OF HITS...")
             self.query.first = data.first;
+            
             TableDataService.getCount(self.query).then(function(data){
                 console.log("HIT COUNT RETRIEVED")
                 self.hits =data.count;
@@ -68,6 +64,7 @@ class TableDataController {
                     break;
                 case "back":
                     self.query.last = self.previous.pop();
+
                     break;
                 case "limit":
                     self.query.last = self.previous.length != 0 ? self.previous.pop(): self.data.first;
@@ -105,6 +102,24 @@ class TableDataController {
             console.log(self.displayed_samples);
         };
 
+        self.updateFilters = function (removed_filter) {
+            console.log("UPDATING ROWS AFTER REMOVAL OF FILTER");
+            console.log(removed_filter);
+            
+            var idx;
+            for (idx in self.filters.list) {
+
+                if ( (self.filters.list[idx].label == removed_filter.name) ) {
+                    self.filters.list[idx][removed_filter.var] = null;
+
+                    console.log(self.filters.list[idx]);
+                    break;
+                }
+            }
+
+            self.filterTable();
+        }
+
         self.filterTable = function () {
             console.log("FILTER SUBMISSION TO SERVER");
             self.query.last = 1;
@@ -116,8 +131,11 @@ class TableDataController {
             var idx
             for (idx in self.query.filters.list) {
 
-                if ( (self.query.filters.list[idx].type == "autocomplete") || self.query.filters.list[idx].type == "select" ) {
+                if (  self.query.filters.list[idx].type == "select" ) {
                     delete self.query.filters.list[idx]["options"]
+                }
+                else if (  self.query.filters.list[idx].type == "autocomplete" ) {
+                    delete self.query.filters.list[idx]["url"]
                 }
             }
             
@@ -157,16 +175,29 @@ class TableDataController {
         self.searchTerm = function(searchText, formElement) {
             
 
-            return formElement.options.filter(self.createFilterFor(searchText))
-            /*
-            return $http.get(formElement.url + "?q=" + searchText)
-                .then(function(response) {
-                    console.log("Matches for search term " + searchText + " -- RETRIEVED")
-                    console.log(response.data);
+            //return formElement.options.filter(self.createFilterFor(searchText))
+            
+            return $http({
+                method: 'POST',
+                url: formElement.url,
+                headers: {
+                    'Content-Type': 'Application/json',
+                    'Accepts': 'Application/json',
+                    'X-Stream': 'true'
+                },
+                data: {
+                    "username": self.query.username,
+                    "experiment": self.query.experiment,
+                    "file": self.query.file,
+                    "term": searchText
+                }
 
-                    return response.data.elements
-                })
-            */
+            }).then(function(response) {
+                console.log("ENTRIES FOR SUBMITTED TERM:");
+                console.log(response.data.options);
+                return response.data.options
+            })
+            
         }
 
         self.createFilterFor = function (query) {
@@ -177,6 +208,45 @@ class TableDataController {
                 return (lowercaseElem.indexOf(lowercaseQuery) === 0);
             };
 
+        }
+
+        self.openDialog = function ($event, context) {
+            var url = "";
+            
+            switch (context) {
+                case "filters":
+                    url = "./src/table/templates/filters.html";
+                    if (self.filters == null) {
+                        $http.get("http://" + generalConfig.django.address + ":" + generalConfig.django.port + "/dataService/" + self.query.username + "/" + self.query.experiment + "/" + self.query.file + "/filters/")
+                        .then(function(response) {
+                            console.log("FILTERS RETRIEVED");
+                            self.filters = response.data;
+                            console.log(self.filters)
+
+                        })
+                    }
+                    break;
+            }
+
+            var dialog = {
+                fullscreen: true,
+                autowrap: false,
+                parent: angular.element(document.body),
+                targetEvent: $event,
+                templateUrl: url,
+                clickOutsideToClose: true,
+                controller: () => self,
+                controllerAs: '$ctrl'
+            }
+
+            $mdDialog.show(dialog)
+                .finally(function () {
+                    console.log("Dialog closed.");
+                    //self.selected = null;
+                    //self.genotype_headers = null;
+                    //self.displayed_samples = null;
+                    //self.genotypes_page = 1;
+                })
         }
 
         // Metodo chiamato per visualizzare le annotazioni di una particolare variante
@@ -208,7 +278,14 @@ class TableDataController {
                 })
         };
 
-        self.closeDialog = function () {
+        self.closeDialog = function (context) {
+
+            switch (context) {
+                case "filters":
+                    self.filterTable();
+                    break;
+            }
+
             $mdDialog.hide();
         };
     }

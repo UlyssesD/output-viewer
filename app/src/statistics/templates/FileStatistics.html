@@ -8,10 +8,17 @@
     <md-content layout="row" md-colors="{background: 'default-grey-100'}">
 
         <md-list flex>
-            <ng-repeat ng-repeat="el in $ctrl.config.elements track by $index">
-                <md-subheader class="md-sticky" md-colors="{background: 'default-accent-hue-2'}">{{el.header}}</md-subheader>
+            <ng-repeat ng-repeat="el in $ctrl.data.elems track by $index">
+                <!-- <md-subheader class="md-sticky" md-colors="{background: 'default-accent-hue-2'}">{{el.header}}</md-subheader>
                 <ng-repeat ng-repeat="stat in el.values track by $index" bind-html-compile="stat">
-                </ng-repeat>
+                </ng-repeat> -->
+                <md-list-item class='md-2-line'>
+                    <div class='md-list-item-text'>
+                        <h3>{{ el.name }}</h3>
+                        <em md-colors="{color: 'default-primary-hue-2-0.87'}">{{ el.value }}</em>
+                    </div>
+                </md-list-item>
+                <md-divider inset></md-divider>
             </ng-repeat>
         </md-list>
     </md-content>

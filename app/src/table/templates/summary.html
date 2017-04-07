@@ -1,0 +1,48 @@
+<md-dialog md-colors="{background: 'default-grey-200'}" >
+  <md-toolbar layout="row" class="md-whiteframe-4dp">
+    <div class="md-toolbar-tools" >
+      <h2 style="color: white">Detailed Summary for selected row</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" ng-click="$ctrl.closeDialog()">
+        <md-icon md-font-set="material-icons" style="color: white"> clear </md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-dialog-content layout="column" style="position:relative;width:800px; min-height:250px; max-height:810px;">
+    <div layout="row">
+            <div  layout="column" flex="50">
+            <md-list flex>
+            <ng-repeat ng-repeat="el in $ctrl.selected track by $index">
+                <md-list-item class="md-2-line" ng-if="$even" ng-show="el != null">
+                    <div class="md-list-item-text" layout="column">
+                        <strong>{{$ctrl.data.header[$index]}}</strong>
+                        <em ng-if="!$ctrl.isArray(el)" >{{el == null ? ".": el}}</em>
+                        <!--<em ng-if="$ctrl.isArray(el)">
+                            <ng-repeat ng-repeat="i in el">{{i}} {{$last ? "": ","}}</ng-repeat>
+                        </em>-->
+                        <em ng-if="$ctrl.isArray(el)" ng-repeat="i in el track by $index">{{i}}</em>
+                    </div>
+                </md-list-item>
+                </ng-repeat>
+        </md-list>
+            </div>
+
+            <div flex=50 layout="column">
+              <md-list flex>
+                <ng-repeat ng-repeat="el in $ctrl.selected track by $index">
+                <md-list-item class="md-2-line" ng-if="$odd" ng-show="el != null">
+                    <div class="md-list-item-text" layout="column">
+                        <strong>{{$ctrl.data.header[$index]}}</strong>
+                        <em ng-if="!$ctrl.isArray(el)">{{el == null ? ".": el}}</em>
+                        <!--<em ng-if="$ctrl.isArray(el)">
+                            <ng-repeat ng-repeat="i in el">{{i}} {{$last ? "": ","}}</ng-repeat>
+                        </em>-->
+                        <em ng-if="$ctrl.isArray(el)" ng-repeat="i in el track by $index">{{i}}</em>
+                    </div>
+                </md-list-item>
+                </ng-repeat>
+            </div>
+          </div>
+  </md-dialog-content>
+</md-dialog>

@@ -29,7 +29,7 @@ class FileStatisticsController {
             
             self.data = data;
 
-            self.template = self.config.elements.join("\n");
+            //self.template = self.config.elements.join("\n");
             //console.log(self.data)
         }
 

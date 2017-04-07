@@ -7,7 +7,7 @@ class TableDataController {
      * 
      * @param $log
      */
-    constructor($http, $routeParams, $log, $mdDialog, TableDataService) {
+    constructor($http, $routeParams, $log, $mdDialog, $mdSidenav, TableDataService) {
         var self = this;
         self.$log = $log;
         self.isArray = angular.isArray;
@@ -48,7 +48,8 @@ class TableDataController {
             
             TableDataService.getCount(self.query).then(function(data){
                 console.log("HIT COUNT RETRIEVED")
-                self.hits =data.count;
+                self.hits = data.count;
+                console.log(self.hits);
             })
 
         }).catch(function () { console.log('Some error occurred') });
@@ -136,6 +137,7 @@ class TableDataController {
                 }
                 else if (  self.query.filters.list[idx].type == "autocomplete" ) {
                     delete self.query.filters.list[idx]["url"]
+                    delete self.query.filters.list[idx]["options"]
                 }
             }
             
@@ -149,7 +151,8 @@ class TableDataController {
                 self.query.first = data.first;
                 TableDataService.getCount(self.query).then(function(data){
                     console.log("HIT COUNT RETRIEVED")
-                    self.hits =data.count;
+                    self.hits = data.count;
+                    console.log(self.hits);
                 })
 
             }).catch(function () { console.log('Some error occurred') });
@@ -161,12 +164,26 @@ class TableDataController {
             
             if (!formElement.options) {
 
-                return $http.get(formElement.url)
-                    .then(function(response) {
+                return $http({
+                    method: 'POST',
+                    url: formElement.url,
+                    headers: {
+                        'Content-Type': 'Application/json',
+                        'Accepts': 'Application/json',
+                        'X-Stream': 'true'
+                    },
+                    data: {
+                        "username": self.query.username,
+                        "experiment": self.query.experiment,
+                        "file": self.query.file,
+                        "term": searchText
+                    }
+
+                    }).then(function(response) {
                         console.log("Options for field " + formElement.label + " -- RETRIEVED");
                         console.log(response.data);
                         
-                        formElement.options = response.data.elements;
+                        formElement.options = response.data.options;
                     })
 
             }    
@@ -174,10 +191,12 @@ class TableDataController {
 
         self.searchTerm = function(searchText, formElement) {
             
+            return formElement.options.filter(self.createFilterFor(searchText));
+
 
             //return formElement.options.filter(self.createFilterFor(searchText))
             
-            return $http({
+        /*    return $http({
                 method: 'POST',
                 url: formElement.url,
                 headers: {
@@ -196,7 +215,7 @@ class TableDataController {
                 console.log("ENTRIES FOR SUBMITTED TERM:");
                 console.log(response.data.options);
                 return response.data.options
-            })
+            })*/
             
         }
 
@@ -210,7 +229,7 @@ class TableDataController {
 
         }
 
-        self.openDialog = function ($event, context) {
+        self.openDialog = function ($event, context, element=null) {
             var url = "";
             
             switch (context) {
@@ -225,6 +244,11 @@ class TableDataController {
 
                         })
                     }
+                    break;
+
+                case "summary":
+                    self.selected = element
+                    url = "./src/table/templates/summary.html"
                     break;
             }
 
@@ -247,6 +271,10 @@ class TableDataController {
                     //self.displayed_samples = null;
                     //self.genotypes_page = 1;
                 })
+        }
+
+        self.openSideMenu = function() {
+            $mdSidenav('right').toggle();
         }
 
         // Metodo chiamato per visualizzare le annotazioni di una particolare variante

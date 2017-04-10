@@ -1,0 +1,120 @@
+<md-content layout="column" flex>
+	<div layout="row"><p>&nbsp</p></div>
+
+	<!-- Sezione del titolo -->
+	<div layout="row" layout-padding layout-align="center center" md-colors="{background: 'primary', color: 'background-A100' }">
+		<div flex><img src="./assets/svg/logo.svg" class="presentation"></div>
+		<div flex><h1 class="md-display-4"><span>Big Data</span><span> Bioinformatics Viewer</span></h1></div>
+	</div>
+	<section layout="row" layout-align="center start">
+		<span flex="10"></span>
+		<section flex="50" layout-padding >
+			<div flex="10"></div>
+			<div class="md-display-2" flex="80">
+				<p><strong>Big Data Bioinformatics viewer</strong> is a free tool made for analysis of different files.</p>
+				<p>It supports ulpading and conversion for Variant Call Format (.vcf) and many others.</p>
+				<p>It provides tool to quickly search and filter informations contained in a previously uploaded file.</p>
+				<p>Start using the tool now!</p>
+			</div>
+			<div flex="10"></div>	
+		</section>
+
+		<section flex="30">
+			
+			<div layout="row"><p>&nbsp</p></div>
+			
+			<!-- Login form -->
+			<md-card flex style="max-height: 400px">
+				<md-card-header md-colors="{background: 'primary-hue-2', color: 'background-A100' }">
+					<md-card-header-text>
+						<span class="md-title">Login</span>
+						<!-- <span class="md-subhead">Sign up or login to start using the tool</span> -->
+					</md-card-header-text>
+				</md-card-header>
+				<form name="loginForm">
+					<md-card-content layout-padding layout="column">
+					<div ng-if="app.login.wrong" class="md-cornered" md-colors="{background: 'warn', color: 'background-A100' }">
+							<p><strong>Wrong username and/or password.</strong></p>
+						</div>
+							<md-input-container layout="row">
+								<label>Username</label>
+								<input ng-model="app.login.username" name="username" required>
+							</md-input-container>
+
+							<md-input-container layout="row">
+								<label>Password</label>
+								<input ng-model="app.login.password" name="password" type="password" required>
+							</md-input-container>
+
+					</md-card-content>
+					
+					<md-card-actions layout="row" layout-align="end center">	
+	   					<md-button ng-disabled="loginForm.$invalid" ng-click="app.login()">Login</md-button>
+					</md-card-actions>
+				</form>
+			</md-card>
+			
+			<div layout="row"><p>&nbsp</p></div>
+			
+			<!-- Signup form -->
+			<md-card flex style="max-height: 700px">
+				<md-card-header md-colors="{background: 'accent-hue-3', color: 'background-A100' }">
+					<md-card-header-text>
+						<span class="md-title">Not yet registered? Register</span>
+						<!-- <span class="md-subhead">Please use this form to register</span> -->
+					</md-card-header-text>
+				</md-card-header>
+				<form name="signUpForm">
+					<md-card-content layout-padding layout="column">
+						<div ng-if="app.signup.username_exists" class="md-cornered" md-colors="{background: 'warn', color: 'background-A100' }">
+							<p><strong>Username already exists in database.</strong></p>
+						</div>
+							<md-input-container layout="row">
+								<label>Username</label>
+								<input ng-model="app.signup.username" name="username" required>
+								<div ng-messages="signUpForm.username.$error">
+          							<div ng-message="required">This is required.</div>
+        						</div>
+							</md-input-container>
+
+
+							<md-input-container layout="row">
+								<label>Password</label>
+								<input ng-model="app.signup.password" name="password" type="password" required>
+								<div ng-messages="signUpForm.password.$error">
+          							<div ng-message="required">This is required.</div>
+        						</div>
+							</md-input-container>
+
+							<md-input-container layout="row">
+								<label>Repeat password</label>
+								<input ng-model="app.signup.retype_password" name="retype_password" type="password" ng-pattern="app.signup.password" required>
+								<div ng-messages="signUpForm.retype_password.$error">
+          							<div ng-message="required">This is required.</div>
+          							<div ng-message="pattern">Password must match.</div>
+        						</div>
+							</md-input-container>
+
+							<md-input-container layout="row">
+								<label>Email</label>
+								<input ng-model="app.signup.email" name="email" type="email" ng-pattern="/^.+@.+\..+$/" required>
+								<div ng-messages="signUpForm.email.$error">
+          							<div ng-message="required">This is required.</div>
+          							<div ng-message="pattern">Please, provide a valid email address.</div>
+        						</div>
+							</md-input-container>
+
+					</md-card-content>
+					
+					<md-card-actions layout="row" layout-align="end center">	
+	   					<md-button ng-disabled="signUpForm.$invalid" ng-click="app.signup()">Submit</md-button>
+					</md-card-actions>
+				</form>
+			</md-card>
+
+		</section>
+
+		<span flex="10"></span>
+	</section>
+
+</md-content>

@@ -42,7 +42,7 @@ export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMessa
     // Route definitions
     $routeProvider
     .when("/", {
-      templateUrl: "pages/myFiles.htm"
+      templateUrl: "pages/main.htm"
     })
     .when("/myFiles", {
       templateUrl: "pages/myFiles.htm" 

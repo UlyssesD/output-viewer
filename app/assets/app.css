@@ -1,6 +1,11 @@
 .logo {
   max-height: 192px;
 }
+.presentation {
+  /*position: absolute;*/
+  height: 600px;
+  
+}
 
 .banner {
   max-height: 200px;

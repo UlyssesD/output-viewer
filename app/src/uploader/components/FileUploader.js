@@ -5,6 +5,6 @@ export default {
     config : {
         bindings: { data: '<' },
         templateUrl: 'src/uploader/templates/FileUploader.html',
-        controller: [ '$http', '$q', '$log', '$mdDialog', 'Upload', FileUploaderController ]
+        controller: [ '$http', '$q', '$log', '$mdDialog', '$cookies', 'Upload', FileUploaderController ]
     }
 };

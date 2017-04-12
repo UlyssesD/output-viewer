@@ -1,10 +1,42 @@
-<section layout="column" flex="15">
-	<menu-list></menu-list>
+<!-- Barra applicazione (fissa) -->
+  <md-toolbar layout="row" class="md-tall md-toolbar-tools md-whiteframe-8dp" md-colors="{background: 'primary', color: 'background-A100' }">
+    <section layout="row" flex="25" layout-align="center center">
+      <img src="./assets/svg/logo.svg" class="banner">
+      <h1><span>Big Data </span><span>Bioinformatics </span><span>Viewer</span></h1>
+    </section>
+
+    <section flex="85">
+    </section>
+  </md-toolbar>
+
+  <md-toolbar layout="row" class="md-toolbar-tools" md-colors="{background: 'default-primary', color: 'background-A100'}">
+    <section flex="15">
+
+    </section>
+    <section flex="70">
+      <!--<h1>
+        <span>My files</span>
+        <md-icon class="material-icons" md-font-set='material-icons' style="color: white">chevron_right</md-icon>
+        <span>U11_80M_R2.annotated.hg19_multianno</span>
+      </h1>-->
+
 </section>
+<section flex="15" layout="row" layout-align="end center">
 
-<md-divider></md-divider>
+<!--<md-button class="md-raised md-accent" ng-click="app.openStatistics()">
+    Statistics
+  </md-button> -->
+</section>
+</md-toolbar>
+<section layout="row" flex>
+	<section layout="column" flex="15">
+		<menu-list></menu-list>
+	</section>
 
-<md-content layout="column" md-colors="{background: 'default-grey-200'}" flex="85">
-    <file-uploader></file-uploader>
-    <file-explorer></file-explorer>
-</md-content>
+	<md-divider></md-divider>
+
+	<md-content layout="column" md-colors="{background: 'default-grey-200'}" flex="85">
+	    <file-explorer></file-explorer>
+	</md-content>
+</section>
+<file-uploader></file-uploader>

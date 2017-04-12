@@ -3,6 +3,7 @@ import angular from 'angular';
 
 
 import 'angular-messages';
+import 'angular-cookies';
 import 'angular-animate';
 import 'angular-aria';
 import 'angular-material';
@@ -23,7 +24,7 @@ import Uploader from 'src/uploader/Uploader';
 import Table from 'src/table/Table';
 import Statistics from 'src/statistics/Statistics';
 
-export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngMessages', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Uploader.name, Table.name, Statistics.name ] )
+export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngCookies', 'ngMessages', 'ngMaterial', 'ngFileUpload', 'md.data.table', Menu.name, Explorer.name, Uploader.name, Table.name, Statistics.name ] )
   .config(($httpProvider, $routeProvider, $mdIconProvider, $mdThemingProvider) => {
 
     $httpProvider.defaults.xsrfCookieName = 'csrftoken';

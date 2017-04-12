@@ -1,4 +1,4 @@
-<section layout="row" layout-padding flex>
+<!-- <section layout="row" layout-padding flex>
      <h1> Please select an experiment to show the list of file contained </h1>
 </section>
 <section layout-padding>
@@ -22,4 +22,32 @@
         </md-list>
     </md-card-content>
 
+</section> -->
+
+<section layout="row">
+    <md-card layout="column" flex>
+        <md-toolbar class="md-table-toolbar md-default">
+            <div class="md-toolbar-tools">
+            <span><input name="searchText" ng-model="$ctrl.term"></span>
+            </div>
+        </md-toolbar>
+        <md-table-container>
+        <table md-table md-progress="$ctrl.promise">
+            <thead md-head>
+                <tr md-row>
+                    <th md-column ng-repeat="h in $ctrl.data.headers track by $index" ng-hide="$last">
+                        <span md-colors="{color: 'default-primary-hue-2'}">{{ h }}</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody md-body style="height:auto; max-height: 400px; overflow-y: auto">
+                <tr md-row ng-repeat="row in  $ctrl.data.elements track by $index | filter: $ctrl.filter">
+                    <td md-cell ng-repeat="el in row track by $index" ng-hide="$last">
+                        <span>{{el}}</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </md-table-container>
+    </md-card>
 </section>

@@ -7,7 +7,7 @@
 import config from "configuration.json!json";
 
 
-function AppController( MenuDataService, TableDataService, Upload, $http, $mdSidenav, $mdToast) {
+function AppController( MenuDataService, TableDataService, Upload, $http, $mdSidenav, $cookies, $mdToast) {
     var self = this;
     
     self.login = {
@@ -61,6 +61,8 @@ function AppController( MenuDataService, TableDataService, Upload, $http, $mdSid
                         console.log("LOGIN SUCCEDED.")
                         self.login.wrong = false;
 
+                        $cookies.put("username", self.login.username);
+
                         // ADD COOKIE
                         location.href= "#/myFiles"
                         break;
@@ -107,7 +109,7 @@ function AppController( MenuDataService, TableDataService, Upload, $http, $mdSid
                         console.log("USER SUCCESSFULLY CREATED.")
                         self.signup.username_exists = false;
 
-                        // ADD COOKIE
+                        $cookies.put("username", self.signup.username);
                         location.href= "#/myFiles"
                         break;
                 }
@@ -132,4 +134,4 @@ function AppController( MenuDataService, TableDataService, Upload, $http, $mdSid
     }
 
 }
-export default ['MenuDataService', 'TableDataService', 'Upload', '$http', '$mdSidenav', '$mdToast', AppController ];
+export default ['MenuDataService', 'TableDataService', 'Upload', '$http', '$mdSidenav', '$cookies', '$mdToast', AppController ];

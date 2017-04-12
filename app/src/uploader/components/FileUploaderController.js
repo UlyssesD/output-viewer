@@ -2,7 +2,7 @@ import config from "configuration.json!json";
 
 class FileUploaderController {
 
-    constructor($http, $q, $log, $mdDialog, Upload) {
+    constructor($http, $q, $log, $mdDialog, $cookies, Upload) {
         var self = this;
 
         self.$log = $log;
@@ -94,7 +94,7 @@ class FileUploaderController {
 
             angular.forEach(self.experiment.files, function (file) {
 
-                self.Upload.upload({
+                /*self.Upload.upload({
                     url: 'api/upload.php',
                     method: 'POST',
                     file: file,
@@ -112,6 +112,30 @@ class FileUploaderController {
                     console.log("Success! ", resp);
                 }, function (resp) {
                     console.log('Error status: ', resp);
+                }, function (evt) {
+                    file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                    //console.log(file.name + " progress: " + file.progress + "%;");
+                });*/
+
+                self.Upload.upload({
+                    url: "http://" + config.django.address + ":" + config.django.port + "/dataService/upload/",
+                    method: 'POST',
+                    file: file,
+                    headers: { 'Content-Type': 'text' },
+                    data: { 
+                        'targetPath': 'file_queue/',
+                        'tempFolder': config.neo4j.temp_folder,
+                        'username': $cookies.get("username"),
+                        'experiment': self.experiment.name, 
+                        'type': self.experiment.type,
+                        'species': self.experiment.species.value
+                    },
+                }).then(function (resp) {
+                    file.progress = 101;
+                    console.log("Success! ", resp);
+                }, function (resp) {
+                    console.log('Error status: ', resp);
+                    file.progress = 102;
                 }, function (evt) {
                     file.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                     //console.log(file.name + " progress: " + file.progress + "%;");

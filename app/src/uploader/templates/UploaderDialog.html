@@ -82,6 +82,7 @@
 
                                 <div ng-switch-when="undefined"></div>
                                 <md-progress-linear md-mode="indeterminate" ng-switch-when="100"></md-progress-linear>
+                                <div ng-switch-when="102" md-colors="{color: 'default-warn'}"><span></span><p>Failed</p></div>
                                 <div ng-switch-when="101" md-colors="{color: 'default-primary-hue-2'}"><span></span><p>Completed</p></div>
                                 <md-progress-linear md-mode="determinate" value="{{file.progress}}" ng-switch-default></md-progress-linear>
 

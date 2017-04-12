@@ -6,6 +6,6 @@ export default {
     config : {
         bindings: { data: '<' },
         templateUrl: 'src/explorer/templates/FileExplorer.html',
-        controller: [ '$http', '$log', 'FileExplorerService', FileExplorerController ]
+        controller: [ '$http', '$cookies', '$log', 'FileExplorerService', FileExplorerController ]
     }
 };

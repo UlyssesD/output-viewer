@@ -14,7 +14,7 @@ class FileStatisticsController {
 
         self.query = {
             'username': 'lola',
-            'experiment': $routeParams.experiment,
+            'experiment': 'lallero',
             'file': $routeParams.filename
         }
 

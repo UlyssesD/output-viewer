@@ -7,7 +7,7 @@ class TableDataController {
      * 
      * @param $log
      */
-    constructor($http, $routeParams, $log, $mdDialog, $mdSidenav, TableDataService) {
+    constructor($http, $routeParams, $cookies, $log, $mdDialog, $mdSidenav, TableDataService) {
         var self = this;
         self.$log = $log;
         self.isArray = angular.isArray;
@@ -18,8 +18,8 @@ class TableDataController {
         self.rows = [];
 
         self.query = {
-            'username': 'lola',
-            'experiment': $routeParams.experiment,
+            'username': $cookies.get("username"),
+            'experiment': 'lallero',
             'file': $routeParams.filename,
             'limit': 10,
             'page': 1,

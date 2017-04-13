@@ -48,7 +48,7 @@ export default angular.module( 'starter-app', ['ngRoute', 'ngResource', 'ngCooki
     .when("/myFiles", {
       templateUrl: "pages/myFiles.htm" 
     })
-    .when("/details/:experiment/:filename", {
+    .when("/details/:filename", {
       templateUrl: "pages/fileDetails.htm"
     })
     .otherwise({

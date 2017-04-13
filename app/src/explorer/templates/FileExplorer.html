@@ -24,11 +24,11 @@
 
 </section> -->
 
-<section layout="row">
-    <md-card layout="column" flex>
+<section layout="row" flex>
+    <md-card layout="column" flex="70">
         <md-toolbar class="md-table-toolbar md-default">
             <div class="md-toolbar-tools">
-            <span><input name="searchText" ng-model="$ctrl.term"></span>
+            <span><input name="searchText" ng-model="$ctrl.term" placeholder="Filter by filename">  <md-icon md-font-set="material-icons"> search </md-icon></span>
             </div>
         </md-toolbar>
         <md-table-container>
@@ -41,7 +41,7 @@
                 </tr>
             </thead>
             <tbody md-body style="height:auto; max-height: 400px; overflow-y: auto">
-                <tr md-row ng-repeat="row in  $ctrl.data.elements track by $index | filter: $ctrl.filter">
+                <tr md-row ng-repeat="row in  $ctrl.data.elements | filter: $ctrl.filter track by $index" ng-click="$ctrl.selected = row">
                     <td md-cell ng-repeat="el in row track by $index" ng-hide="$last">
                         <span>{{el}}</span>
                     </td>
@@ -50,4 +50,30 @@
         </table>
     </md-table-container>
     </md-card>
+
+<section layout="column" flex="30">
+    <md-card style="height:auto; max-height: 500px;">
+        <md-card-header md-colors="{background: 'default-primary-hue-2-0.87', color: 'background-A100'}">
+            <md-card-header-text>
+                <span class="md-title">File Details</span>
+                <span class="md-subhead">Select file to view its summary</span>
+            </md-card-header-text>
+        </md-card-header>
+        <md-divider></md-divider>
+        <md-card-content style="height:auto; max-height: 500px; overflow-y: auto">
+            <md-list flex>
+                <md-list-item ng-repeat="el in $ctrl.selected track by $index" class='md-2-line' ng-hide="$last">
+                    <div class='md-list-item-text'>
+                        <h3 md-colors="{color: 'default-primary-hue-2-0.87'}">{{ $ctrl.data.headers[$index] }}</h3>
+                        <em>{{ el }}</em>
+                    </div>
+                </md-list-item>
+            </md-list>
+        </md-card-content>
+        <md-card-actions layout="row" layout-align="end center">
+            <md-button class="md-primary md-raised" ng-disabled="$ctrl.selected == null" href="{{$ctrl.data.base_url}}{{$ctrl.selected[$ctrl.selected.length -1]}}.data.gz" >Download CSV</md-button>
+            <md-button class="md-accent md-raised" ng-disabled="$ctrl.selected == null" href="#details/{{$ctrl.selected[$ctrl.selected.length -1]}}">Open File</md-button>
+        </md-card-actions>
+    </md-card>
+    </section>
 </section>

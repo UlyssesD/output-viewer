@@ -96,8 +96,8 @@
         </md-card-header>
         <md-divider></md-divider>
         <md-card-content style="height:auto; max-height: 550px; overflow-y: auto">
-            <md-list flex>
-                <md-list-item ng-repeat="h in $ctrl.data.header track by $index"">
+            <md-list>
+                <md-list-item ng-repeat="h in $ctrl.data.header track by $index">
                     <p> {{ h }} </p>
                     <md-checkbox class="md-secondary" ng-model="$ctrl.show_header[$index]"></md-checkbox>
                 </md-list-item>

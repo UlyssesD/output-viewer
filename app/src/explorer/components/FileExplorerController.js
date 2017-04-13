@@ -15,7 +15,7 @@ class FileExplorerController {
             'username': 'lola',
             'experiment': null
         }
-
+        self.selected = null;
         self.experiments = null;
 
 
@@ -35,6 +35,7 @@ class FileExplorerController {
 
                 console.log("LIST OF FILES RETRIEVED.")
                 self.data = response.data;
+                console.log(self.data)
             });
 
         /*$http.get("http://" + config.django.address + ":" + config.django.port + "/dataService/"+ self.query.username +"/experiments/")
@@ -50,12 +51,12 @@ class FileExplorerController {
         //    self.processDataForVisualization(data);
         //}).catch(function (err) { console.log('Some error occurred',  err) });
         self.filter = function(element){
-            console.log(element)
             if (self.term == null)
                 return true
             else
-                return element[0].startsWith(self.term) ? true : false;
+                return element[0].startsWith(self.term);
         }
+
         self.show = function() {
             console.log(self.query.experiment)
             FileExplorerService.loadData(self.query).then(function(data){

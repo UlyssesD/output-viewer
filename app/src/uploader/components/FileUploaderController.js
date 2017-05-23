@@ -16,14 +16,14 @@ class FileUploaderController {
             searchTerm: '',
             list: [
                 {
-                    display: "Human",
-                    value: "human"
+                    display: "Bos Taurus",
+                    value: "Bos Taurus"
                 }, {
-                    display: "Cow",
-                    value: "cow"
+                    display: "Homo Sapiens",
+                    value: "Homo Sapiens"
                 }, {
-                    display: "Peach",
-                    value: "peach"
+                    display: "Prunus Persica",
+                    value: "Prunus Persica"
                 }
             ]
         }

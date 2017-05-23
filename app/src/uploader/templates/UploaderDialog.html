@@ -30,6 +30,7 @@
                         <label>Input file(s) format</label>
                         <md-select name="type" ng-model="$ctrl.experiment.type" required>
                             <md-option value="vcf">Variant Call Format (.vcf)</md-option>
+                            <md-option value="gtf">Gene Transfer Format (.gtf)</md-option>
                         </md-select>
                         <div ng-messages="uploadForm.type.$error">
                             <div ng-message="required">This field is required.</div>

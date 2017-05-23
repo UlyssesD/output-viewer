@@ -9,7 +9,7 @@ import config from "configuration.json!json";
 
 function AppController( MenuDataService, TableDataService, Upload, $http, $mdSidenav, $cookies, $mdToast) {
     var self = this;
-    
+    self.cookies = $cookies;
     self.login = {
         'wrong': false,
         'username': null,
@@ -116,7 +116,10 @@ function AppController( MenuDataService, TableDataService, Upload, $http, $mdSid
             });
 
     }
-
+    self.logout = function(){
+        $cookies.remove("username");
+        alert($cookies.get("username"))
+    }
     //self.data         = null;
 
     self.openStatistics = openStatistics;

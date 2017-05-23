@@ -44,6 +44,11 @@
 </section>
 <section layout="row" flex>     
 <md-card layout="column" flex="70">
+    <md-card-header>
+        <md-card-header-text>
+            <span class="md-title">Details for file "{{$ctrl.filename}}"</span>
+        </md-card-header-text>
+    </md-card-header>
     <md-toolbar class="md-table-toolbar md-default">
         <div class="md-toolbar-tools">
             <span ng-hide="$ctrl.hits != null">
@@ -67,12 +72,12 @@
         <table md-table md-progress="$ctrl.promise">
             <thead md-head>
                 <tr md-row>
-                    <th md-column ng-repeat="h in $ctrl.data.header track by $index" ng-show="$ctrl.show_header[$index]"><span md-colors="{color: 'default-primary-hue-2'}">{{ h }}</span></th>
+                    <th md-column ng-repeat="h in $ctrl.data.header track by $index" ng-if="$ctrl.show_header[$index]"><span md-colors="{color: 'default-primary-hue-2'}">{{ h }}</span></th>
                 </tr>
             </thead>
             <tbody md-body style="height:auto; max-height: 400px; overflow-y: auto">
                 <tr md-row ng-repeat="row in  $ctrl.data.rows track by $index" ng-click="$ctrl.openDialog($event, 'summary', row)">
-                    <td md-cell ng-repeat="el in row track by $index" ng-show="$ctrl.show_header[$index]">
+                    <td md-cell ng-repeat="el in row track by $index" ng-if="$ctrl.show_header[$index]">
                         <span ng-if="!$ctrl.isArray(el)">{{el == null ? ".": el}}</span>
                         <p ng-if="$ctrl.isArray(el)" ng-repeat="i in el track by $index">{{i}}</p>
                     </td>
@@ -95,14 +100,15 @@
             </md-card-header-text>
         </md-card-header>
         <md-divider></md-divider>
-        <md-card-content style="height:auto; max-height: 550px; overflow-y: auto">
+        <md-card-content layout="column" flex style="height:auto; max-height: 550px; overflow-y:scroll;">
             <md-list>
                 <md-list-item ng-repeat="h in $ctrl.data.header track by $index">
                     <p> {{ h }} </p>
                     <md-checkbox class="md-secondary" ng-model="$ctrl.show_header[$index]"></md-checkbox>
                 </md-list-item>
             </md-list>
-        </md-card-content>
+            </md-content>
+
     </md-card>
 
     <!-- <md-card style="height:auto; max-height: 300px;">

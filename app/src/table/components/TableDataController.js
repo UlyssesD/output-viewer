@@ -37,6 +37,23 @@ class TableDataController {
 
         console.log($routeParams);
 
+        $http({
+            method: 'POST',
+            url: "http://" + generalConfig.django.address + ":" + generalConfig.django.port + "/dataService/filename/",
+            headers: {
+                'Content-Type': 'Application/json',
+                'Accepts': 'Application/json',
+                'X-Stream': 'true'
+            },
+            data: {
+                "file_id": self.query.file,
+            }
+
+        }).then(function(response) {
+            console.log("FILENAME RETRIEVED.");
+            self.filename = response.data.name
+        });
+
         self.config = config;
 
         self.promise = TableDataService.loadVariantsFromQuery(self.query).then(function(data) {
@@ -191,7 +208,7 @@ class TableDataController {
 
         self.searchTerm = function(searchText, formElement) {
             
-            return formElement.options.filter(self.createFilterFor(searchText));
+            return formElement.options.filter(self.createFilterFor(searchText)).slice(0,50);
 
 
             //return formElement.options.filter(self.createFilterFor(searchText))
